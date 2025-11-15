@@ -18,7 +18,7 @@ const Navbar: React.FC = () => {
     { label: "Destination" },
     { label: "Check In" },
     { label: "Check Out" },
-    { label: "Pricing" },
+    { label: "Packages" },
     { label: "Contact" },
   ];
 
@@ -33,12 +33,12 @@ const Navbar: React.FC = () => {
         duration: 0.8,
       }}
     >
-      <nav className="flex justify-between items-center gap-6 m-4 px-6 py-3 bg-[#0E1514]">
+      <nav className="flex justify-between items-center gap-6 m-4 px-6 py-3 bg-[#172349]">
         <div className="flex items-center">
           <img
-            src="/assets/logo.jpg"
+            src="/assets/logo.png"
             alt="Mount Treks Logo"
-            className="h-10 w-auto cursor-pointer"
+            className="h-14 w-auto cursor-pointer"
           />
         </div>
 
@@ -99,6 +99,10 @@ const Navbar: React.FC = () => {
               </ul>
             )}
           </div>
+
+          <button className="rounded-full bg-[#81D5CA] text-[#172349] px-4 py-1.5 text-xs font-semibold shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
+            Sign in
+          </button>
         </div>
       </nav>
     </motion.div>
