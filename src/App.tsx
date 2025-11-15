@@ -1,14 +1,10 @@
-import Home from "./components/landingPage/Home";
-import Navbar from "./components/navbar/Navbar";
-import Searchbar from "./components/searchbar/Searchbar";
+import Home from "./components/pages/heroSection/Home";
 
 const App = () => {
   return (
     <>
       <div>
         <Home />
-        <Navbar />
-        <Searchbar />
       </div>
     </>
   );
