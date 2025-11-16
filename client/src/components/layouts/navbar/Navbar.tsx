@@ -100,7 +100,7 @@ const Navbar: React.FC = () => {
             )}
           </div>
 
-          <button className="rounded-full bg-[#81D5CA] text-[#172349] px-4 py-1.5 text-xs font-semibold shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
+          <button className="rounded-full bg-[#080808] text-[#172349] px-4 py-1.5 text-xs font-semibold shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
             Sign in
           </button>
         </div>

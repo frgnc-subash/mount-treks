@@ -47,7 +47,7 @@ const Searchbar: React.FC<SearchbarProps> = ({ containerClassName }) => {
       return;
     }
     const filtered = items.filter((item) =>
-      item.toLowerCase().includes(value.toLowerCase())
+      item.toLowerCase().includes(value.toLowerCase()),
     );
     setResults(filtered);
   };
