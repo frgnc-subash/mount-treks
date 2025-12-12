@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaGoogle, FaFacebookF, FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaGoogle, FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,13 +35,10 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Social Buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <button className="flex items-center justify-center gap-2 bg-white/60 border border-white/50 hover:bg-white hover:border-white py-2.5 rounded-xl transition-all duration-200 text-sm font-bold text-gray-700 shadow-sm">
-            <FaGoogle className="text-red-500" /> Google
-          </button>
-          <button className="flex items-center justify-center gap-2 bg-white/60 border border-white/50 hover:bg-white hover:border-white py-2.5 rounded-xl transition-all duration-200 text-sm font-bold text-gray-700 shadow-sm">
-            <FaFacebookF className="text-blue-600" /> Facebook
+        {/* Social Buttons - Google Only */}
+        <div className="mb-6">
+          <button className="w-full flex items-center justify-center gap-2 bg-white/60 border border-white/50 hover:bg-white hover:border-white py-3 rounded-xl transition-all duration-200 text-sm font-bold text-gray-700 shadow-sm">
+            <FaGoogle className="text-red-500" /> Continue with Google
           </button>
         </div>
 
@@ -51,7 +48,7 @@ const Login = () => {
             <div className="w-full border-t border-gray-300/50"></div>
           </div>
           <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-wider">
-            <span className="bg-transparent px-2 text-gray-500">Or continue with</span>
+            <span className="bg-transparent px-2 text-gray-500">Or log in with email</span>
           </div>
         </div>
 

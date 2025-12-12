@@ -3,6 +3,7 @@ import { FaMountain, FaRegMap, FaStar, FaArrowDown } from "react-icons/fa";
 import Navbar from "../../layouts/navbar/Navbar";
 import Searchbar from "../../layouts/searchbar/Searchbar";
 import Footer from "@/components/layouts/footer/Footer";
+import Showcase from "./Showcase";
 
 const HeroSection = () => {
   const backgroundImages = [
@@ -129,7 +130,7 @@ const HeroSection = () => {
           <FaArrowDown />
         </div>
       </div>
-
+      <Showcase />
       <Footer />
     </div>
   );

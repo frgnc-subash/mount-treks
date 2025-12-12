@@ -50,7 +50,7 @@ const Searchbar: React.FC<SearchbarProps> = ({ containerClassName }) => {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const featuredPlaces = ["Illam", "Pokhara", "Kathmandu", "Everest Base Camp"];
+  const featuredPlaces = ["Illam", "Everest Base Camp"];
   const items = [
     "Home",
     "About Us",
@@ -202,7 +202,7 @@ const Searchbar: React.FC<SearchbarProps> = ({ containerClassName }) => {
                 onChange={(e) => handleSearch(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search treks, peaks, or guides..."
-                className="w-full pl-14 pr-12 py-4 text-lg text-gray-900 placeholder-gray-400 focus:outline-none bg-transparent font-medium"
+                className="w-full pl-14 pr-12 py-4 text-md text-gray-900 placeholder-gray-400 focus:outline-none bg-transparent font-normal"
               />
               <button
                 onClick={() => {
@@ -313,7 +313,7 @@ const Searchbar: React.FC<SearchbarProps> = ({ containerClassName }) => {
               {/* STATE: RESULTS */}
               {query && results.length > 0 && (
                 <div className="py-1">
-                  <h4 className="px-5 py-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  <h4 className="px-5  text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Results
                   </h4>
                   <ul>
