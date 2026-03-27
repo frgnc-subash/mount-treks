@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   Check,
@@ -13,7 +14,8 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import SearchField from "@/components/search-field";
-import { trekPackages } from "@/lib/packages-data";
+import { resolveLocale, localizePackages } from "@/lib/i18n";
+import { trekPackages, type TrekPackage } from "@/lib/packages-data";
 
 const packageImage: Record<string, string> = {
   "langtang-valley": "/gallery/image8.jpeg",
@@ -45,13 +47,132 @@ const durationDays = (duration: string) => {
 };
 const ICON_STROKE = 2.4;
 
-export default function PackagesPage() {
+export default function PackagesPage({
+  embeddedInDashboard = false,
+}: {
+  embeddedInDashboard?: boolean;
+}) {
+  const searchParams = useSearchParams();
+  const locale = resolveLocale(searchParams.get("lang"));
+  const withLang = (path: string) => {
+    if (locale === "en") return path;
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}lang=${locale}`;
+  };
+  const sortByLocale = (items: TrekPackage[]) => {
+    const sortLocale = locale === "zh" ? "zh" : locale === "es" ? "es" : "en";
+    return [...items].sort((a, b) => a.name.localeCompare(b.name, sortLocale));
+  };
+  const [packagesData, setPackagesData] = useState<TrekPackage[]>(() =>
+    sortByLocale(localizePackages(trekPackages, locale)),
+  );
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recommended" | "price-low" | "duration-short">(
     "recommended",
   );
   const [sortOpen, setSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
+
+  const copy =
+    locale === "zh"
+      ? {
+          badge: "徒步产品",
+          title: "选择你的徒步行程",
+          description: "先浏览产品卡片，再查看详细价格、行程与服务内容。",
+          refine: "筛选产品",
+          clear: "清除",
+          search: "搜索",
+          searchPlaceholder: "按产品名、路线风格或适合人群搜索...",
+          sort: "排序",
+          sortOptions: {
+            recommended: "推荐",
+            priceLow: "价格最低",
+            durationShort: "行程最短",
+          },
+          idealFor: "适合",
+          startingPrice: "起价",
+          view: "查看",
+          book: "预订",
+          noResults: "没有匹配的产品，请调整搜索或排序。",
+          helpBadge: "需要推荐？",
+          helpTitle: "告诉我们时间与体能，我们为你推荐合适线路。",
+          helpDesc: "提供合理节奏、舒适度与预算范围的线路建议。",
+          planButton: "规划我的行程",
+          talkButton: "联系顾问",
+        }
+      : locale === "es"
+        ? {
+            badge: "Paquetes",
+            title: "Elige tu paquete de trekking",
+            description:
+              "Explora las tarjetas primero y luego abre cada paquete para precios y detalles.",
+            refine: "Filtrar paquetes",
+            clear: "Limpiar",
+            search: "Buscar",
+            searchPlaceholder: "Busca por nombre, estilo de ruta o perfil ideal...",
+            sort: "Ordenar",
+            sortOptions: {
+              recommended: "Recomendado",
+              priceLow: "Precio más bajo",
+              durationShort: "Duración más corta",
+            },
+            idealFor: "Ideal para",
+            startingPrice: "Desde",
+            view: "Ver",
+            book: "Reservar",
+            noResults: "No hay paquetes que coincidan. Ajusta búsqueda o filtros.",
+            helpBadge: "¿Necesitas ayuda?",
+            helpTitle:
+              "Cuéntanos tu tiempo y condición física. Te recomendamos la mejor ruta.",
+            helpDesc:
+              "Sugerimos rutas con ritmo realista, nivel de confort y presupuesto acorde.",
+            planButton: "Planear mi trekking",
+            talkButton: "Hablar con un experto",
+          }
+        : {
+            badge: "Trek Packages",
+            title: "Choose Your Trek Package",
+            description:
+              "Browse package cards first, then open each package to view full pricing, itinerary, and all trip details.",
+            refine: "Refine Packages",
+            clear: "Clear",
+            search: "Search",
+            searchPlaceholder: "Search by package name, route style, or ideal trekker...",
+            sort: "Sort",
+            sortOptions: {
+              recommended: "Recommended",
+              priceLow: "Lowest Price",
+              durationShort: "Shortest Duration",
+            },
+            idealFor: "Ideal for",
+            startingPrice: "Starting Price",
+            view: "View",
+            book: "Book",
+            noResults: "No packages matched your filters. Try changing search or sort.",
+            helpBadge: "Need Help Choosing?",
+            helpTitle: "Tell us your time and fitness level. We will suggest the best trek.",
+            helpDesc:
+              "Get a route recommendation with realistic pacing, comfort options, and a matching budget range.",
+            planButton: "Plan My Trek",
+            talkButton: "Talk to Specialist",
+          };
+
+  const idealForLabel = copy.idealFor;
+  const shortenIdealFor = (value: string) => {
+    if (!value) return value;
+    let trimmed = value.trim();
+    if (locale === "zh") {
+      trimmed = trimmed.replace(/(徒步者|爱好者|人群|的人)$/g, "");
+      trimmed = trimmed.replace(/^(适合|针对|适用于)/g, "");
+    } else {
+      trimmed = trimmed.replace(/(trekkers?|trek seekers?)$/gi, "").trim();
+      trimmed = trimmed.replace(/^for\s+/i, "").trim();
+    }
+    if (trimmed.length > 18) {
+      return `${trimmed.slice(0, 18).trim()}…`;
+    }
+    return trimmed || value;
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,18 +182,48 @@ export default function PackagesPage() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [locale]);
+
+  useEffect(() => {
+    setPackagesData(sortByLocale(localizePackages(trekPackages, locale)));
+  }, [locale]);
+
+  useEffect(() => {
+    let canceled = false;
+
+    const loadPackages = async () => {
+      try {
+        const response = await fetch(`/api/public/packages?lang=${locale}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const payload = (await response.json()) as { packages: TrekPackage[] };
+        if (!canceled && Array.isArray(payload.packages)) {
+          setPackagesData(payload.packages);
+        }
+      } catch {
+        // Keep static fallback on request failures.
+      }
+    };
+
+    loadPackages();
+
+    return () => {
+      canceled = true;
+    };
   }, []);
 
   const sortOptions = [
-    { value: "recommended", label: "Recommended" },
-    { value: "price-low", label: "Lowest Price" },
-    { value: "duration-short", label: "Shortest Duration" },
+    { value: "recommended", label: copy.sortOptions.recommended },
+    { value: "price-low", label: copy.sortOptions.priceLow },
+    { value: "duration-short", label: copy.sortOptions.durationShort },
   ] as const;
   const selectedSortLabel =
-    sortOptions.find((option) => option.value === sortBy)?.label || "Recommended";
+    sortOptions.find((option) => option.value === sortBy)?.label ||
+    copy.sortOptions.recommended;
 
   const filteredPackages = useMemo(() => {
-    const searched = trekPackages.filter((item) => {
+    const searched = packagesData.filter((item) => {
       const q = query.trim().toLowerCase();
       if (!q) return true;
       return (
@@ -90,7 +241,7 @@ export default function PackagesPage() {
     }
 
     return sorted;
-  }, [query, sortBy]);
+  }, [query, sortBy, packagesData]);
 
   const clearFilters = () => {
     setQuery("");
@@ -98,18 +249,21 @@ export default function PackagesPage() {
   };
 
   return (
-    <main className="bg-background text-foreground">
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-28 sm:px-8">
+    <main className={embeddedInDashboard ? "text-foreground" : "bg-background text-foreground"}>
+      <section
+        className={
+          embeddedInDashboard
+            ? "mx-auto w-full max-w-6xl px-0 pb-4 pt-0"
+            : "mx-auto w-full max-w-7xl px-5 pb-16 pt-28 sm:px-8"
+        }
+      >
         <div>
           <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary uppercase">
-            Trek Packages
+            {copy.badge}
           </p>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Choose Your Trek Package
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{copy.title}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Browse package cards first, then open each package to view full
-            pricing, itinerary, and all trip details.
+            {copy.description}
           </p>
         </div>
 
@@ -117,36 +271,40 @@ export default function PackagesPage() {
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
               <SlidersHorizontal size={16} strokeWidth={ICON_STROKE} className="text-primary" />
-              Refine Packages
+              {copy.refine}
             </div>
             <div className="w-full sm:w-auto">
               <div className="sm:flex sm:justify-end">
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium text-muted-foreground ring-1 ring-white/12 hover:text-foreground sm:h-8 sm:w-auto"
-                >
-                  <RotateCcw size={12} strokeWidth={ICON_STROKE} />
-                  Clear
-                </button>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium text-muted-foreground ring-1 ring-white/12 hover:text-foreground sm:h-8 sm:w-auto"
+                  >
+                    <RotateCcw size={12} strokeWidth={ICON_STROKE} />
+                    {copy.clear}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="grid gap-3 lg:grid-cols-[1.8fr_1fr]">
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium text-muted-foreground">Search</span>
+              <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                {copy.search}
+              </span>
               <SearchField
                 value={query}
                 onChange={setQuery}
-                placeholder="Search by package name, route style, or ideal trekker..."
+                placeholder={copy.searchPlaceholder}
                 ariaLabel="Search packages"
               />
             </label>
 
             <div>
               <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Sort
+                {copy.sort}
               </span>
               <div ref={sortRef} className="relative">
                 <button
@@ -203,7 +361,7 @@ export default function PackagesPage() {
             >
               <div className="relative h-48 shrink-0 overflow-hidden">
                 <img
-                  src={packageImage[item.id] || "/backgrounds/bg8.jpeg"}
+                  src={item.image || packageImage[item.id] || "/backgrounds/bg8.jpeg"}
                   alt={item.name}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
@@ -222,41 +380,54 @@ export default function PackagesPage() {
                 </p>
 
                 <div className="mt-3 grid gap-2 text-sm text-zinc-200 sm:grid-cols-2">
-                  <p className="flex items-center gap-2">
-                    <Clock3 strokeWidth={ICON_STROKE} className="h-4 w-4 text-primary" />
+                  <p className="flex items-start gap-2">
+                    <Clock3
+                      strokeWidth={ICON_STROKE}
+                      className="mt-0.5 h-4 w-4 text-primary"
+                    />
                     {item.duration}
                   </p>
-                  <p className="flex items-center gap-2">
-                    <Mountain strokeWidth={ICON_STROKE} className="h-4 w-4 text-primary" />
+                  <p className="flex items-start gap-2">
+                    <Mountain
+                      strokeWidth={ICON_STROKE}
+                      className="mt-0.5 h-4 w-4 text-primary"
+                    />
                     {item.altitude}
                   </p>
-                  <p className="flex items-center gap-2">
-                    <ShieldCheck strokeWidth={ICON_STROKE} className="h-4 w-4 text-primary" />
-                    Ideal for: {item.idealFor}
+                  <p className="flex items-start gap-2">
+                    <ShieldCheck
+                      strokeWidth={ICON_STROKE}
+                      className="mt-0.5 h-4 w-4 text-primary"
+                    />
+                    {idealForLabel}: {shortenIdealFor(item.idealFor)}
                   </p>
                 </div>
 
                 <div className="mt-auto pt-4">
                   <div className="rounded-lg border-0 bg-black/25 p-3 ring-0">
                     <div className="mb-3 flex items-center justify-between">
-                      <p className="text-xs tracking-wide text-zinc-300 uppercase">Starting Price</p>
+                      <p className="text-xs tracking-wide text-zinc-300 uppercase">
+                        {copy.startingPrice}
+                      </p>
                       <p className="text-sm font-semibold text-white">
                         {item.pricing[item.pricing.length - 1]?.price}
                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <Link
-                        href={`/packages/${item.id}`}
+                        href={withLang(`/packages/${item.id}`)}
                         className="inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-white/8 bg-black/25 px-3 text-sm font-medium text-white hover:border-white/15 hover:bg-white/10"
                       >
-                        View
+                        {copy.view}
                         <ArrowRight size={13} strokeWidth={ICON_STROKE} />
                       </Link>
                       <Link
-                        href={`/booking?package=${item.id}`}
+                        href={withLang(
+                          `${embeddedInDashboard ? "/dashboard/customer/new-booking" : "/booking"}?package=${item.id}`,
+                        )}
                         className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                       >
-                        Book
+                        {copy.book}
                       </Link>
                     </div>
                   </div>
@@ -267,7 +438,7 @@ export default function PackagesPage() {
         </div>
         {filteredPackages.length === 0 && (
           <p className="mt-6 rounded-lg bg-black/20 px-4 py-3 text-sm text-zinc-300">
-            No packages matched your filters. Try changing search or sort.
+            {copy.noResults}
           </p>
         )}
 
@@ -275,28 +446,28 @@ export default function PackagesPage() {
           <div className="grid gap-5 md:grid-cols-[1.4fr_1fr] md:items-center">
             <div>
               <p className="text-xs font-semibold tracking-[0.2em] text-zinc-400 uppercase">
-                Need Help Choosing?
+                {copy.helpBadge}
               </p>
               <h3 className="mt-1 text-xl font-semibold text-white sm:text-2xl">
-                Tell us your time and fitness level. We will suggest the best trek.
+                {copy.helpTitle}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-                Get a route recommendation with realistic pacing, comfort options, and a matching budget range.
+                {copy.helpDesc}
               </p>
             </div>
 
             <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
               <Link
-                href="/booking"
+                href={withLang(embeddedInDashboard ? "/dashboard/customer/new-booking" : "/booking")}
                 className="inline-flex h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-black transition hover:bg-zinc-200"
               >
-                Plan My Trek
+                {copy.planButton}
               </Link>
               <Link
-                href="/contact"
+                href={withLang("/contact")}
                 className="inline-flex h-11 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.08]"
               >
-                Talk to Specialist
+                {copy.talkButton}
               </Link>
             </div>
           </div>

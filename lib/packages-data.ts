@@ -1,6 +1,7 @@
 export interface TrekPackage {
   id: string;
   name: string;
+  image?: string;
   duration: string;
   altitude: string;
   difficulty: string;
@@ -107,7 +108,7 @@ export const trekPackages: TrekPackage[] = [
     pricing: [
       { label: "1 Pax", price: "$2,240" },
       { label: "2-4 Pax", price: "$1,990 / person" },
-      { label: "5+ Pax", price: "$1,890 / person" },
+      { label: "5+ Pax", price: "$1,950 / person" },
     ],
     itinerary: [
       "Day 1: Arrive in Kathmandu, expedition briefing, and detailed gear inspection.",

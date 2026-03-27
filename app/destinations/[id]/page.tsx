@@ -5,16 +5,23 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Clock3, Mountain, MapPin, ShieldCheck, CalendarDays } from "lucide-react";
 import DestinationDetailMap from "@/components/destination-detail-map-client";
 import DestinationWeather from "@/components/destination-weather";
-import { destinationsById } from "@/lib/destinations-data";
+import { getDestinationById } from "@/lib/content";
+import { resolveLocale } from "@/lib/i18n";
 import { absoluteUrl, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ lang?: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const destination = destinationsById[id];
+  const query = await searchParams;
+  const locale = resolveLocale(query?.lang);
+  const destination = await getDestinationById(id, locale);
 
   if (!destination) {
     return {
@@ -133,9 +140,14 @@ const destinationGallery: Record<string, string[]> = {
   ],
 };
 
-export default async function DestinationDetailPage({ params }: PageProps) {
+export default async function DestinationDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { id } = await params;
-  const destination = destinationsById[id];
+  const query = await searchParams;
+  const locale = resolveLocale(query?.lang);
+  const destination = await getDestinationById(id, locale);
 
   if (!destination) {
     notFound();
@@ -192,6 +204,56 @@ export default async function DestinationDetailPage({ params }: PageProps) {
     url: SITE_URL,
   };
 
+  const backHref = locale ? `/destinations?lang=${locale}` : "/destinations";
+  const bookingHref = locale
+    ? `/packages/${destination.id}?lang=${locale}`
+    : `/packages/${destination.id}`;
+  const copy =
+    locale === "zh"
+      ? {
+          back: "返回地图",
+          badge: "高端远征",
+          intro:
+            "此页面提供路线地图、天气概览、关键徒步信息与照片速览，帮助你快速了解线路。",
+          region: "地区",
+          duration: "行程天数",
+          maxElevation: "最高海拔",
+          difficulty: "难度",
+          bestSeason: "最佳季节",
+          permits: "许可",
+          trailGallery: "路线相册",
+          book: "立即预订",
+        }
+      : locale === "es"
+        ? {
+            back: "Volver al mapa",
+            badge: "Expedición premium",
+            intro:
+              "Esta página ofrece un resumen rápido con mapa, clima y datos clave de la ruta en",
+            region: "Región",
+            duration: "Duración",
+            maxElevation: "Altitud máxima",
+            difficulty: "Dificultad",
+            bestSeason: "Mejor temporada",
+            permits: "Permisos",
+            trailGallery: "Galería de ruta",
+            book: "Reservar este viaje",
+          }
+        : {
+            back: "Back to Map",
+            badge: "Premium Expedition",
+            intro:
+              "This page gives you a quick trail overview with route map, weather snapshot, key trek facts, and photo glimpses from",
+            region: "Region",
+            duration: "Duration",
+            maxElevation: "Max Elevation",
+            difficulty: "Difficulty",
+            bestSeason: "Best Season",
+            permits: "Permits",
+            trailGallery: "Trail Gallery",
+            book: "Book This Trip",
+          };
+
   return (
     <main className="min-h-screen bg-[#050505] text-white">
       <script
@@ -208,11 +270,11 @@ export default async function DestinationDetailPage({ params }: PageProps) {
       />
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-28 sm:px-8">
         <Link
-          href="/destinations"
+          href={backHref}
           className="mb-6 inline-flex items-center gap-2 text-sm text-zinc-300 hover:text-white"
         >
           <ArrowLeft size={16} />
-          Back to Map
+          {copy.back}
         </Link>
 
         <div className="rounded-[2rem] border border-white/10 bg-black/30 p-3 shadow-2xl backdrop-blur-sm sm:p-4">
@@ -225,17 +287,20 @@ export default async function DestinationDetailPage({ params }: PageProps) {
 
         <div className="mt-8 rounded-3xl border border-white/10 bg-black/25 p-6 sm:p-8">
           <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-primary uppercase">
-            Premium Expedition
+            {copy.badge}
           </p>
           <h1 className="text-3xl font-black uppercase tracking-tight sm:text-5xl">
             {destination.name}
           </h1>
-          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-300 sm:text-base">
+          <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-zinc-300 sm:text-base">
             {destination.desc}
           </p>
           <p className="mt-3 max-w-3xl text-xs leading-relaxed text-zinc-400 sm:text-sm">
-            This page gives you a quick trail overview with route map, weather snapshot, key trek
-            facts, and photo glimpses from {destination.name}.
+            {locale === "zh"
+              ? `${copy.intro}${destination.name}。`
+              : locale === "es"
+                ? `${copy.intro} ${destination.name}.`
+                : `${copy.intro} ${destination.name}.`}
           </p>
 
           <div className="mt-6">
@@ -243,6 +308,7 @@ export default async function DestinationDetailPage({ params }: PageProps) {
               lat={destination.lat}
               lng={destination.lng}
               name={destination.name}
+              locale={locale}
             />
           </div>
 
@@ -250,7 +316,7 @@ export default async function DestinationDetailPage({ params }: PageProps) {
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-400">
                 <MapPin size={14} className="text-primary" />
-                Region
+                {copy.region}
               </p>
               <p className="font-medium text-white">{destination.region}</p>
             </div>
@@ -258,7 +324,7 @@ export default async function DestinationDetailPage({ params }: PageProps) {
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-400">
                 <Clock3 size={14} className="text-primary" />
-                Duration
+                {copy.duration}
               </p>
               <p className="font-medium text-white">{destination.duration}</p>
             </div>
@@ -266,7 +332,7 @@ export default async function DestinationDetailPage({ params }: PageProps) {
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-400">
                 <Mountain size={14} className="text-primary" />
-                Max Elevation
+                {copy.maxElevation}
               </p>
               <p className="font-medium text-white">{destination.elevation}</p>
             </div>
@@ -274,7 +340,7 @@ export default async function DestinationDetailPage({ params }: PageProps) {
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-400">
                 <ShieldCheck size={14} className="text-primary" />
-                Difficulty
+                {copy.difficulty}
               </p>
               <p className="font-medium text-white">{destination.difficulty}</p>
             </div>
@@ -282,7 +348,7 @@ export default async function DestinationDetailPage({ params }: PageProps) {
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-400">
                 <CalendarDays size={14} className="text-primary" />
-                Best Season
+                {copy.bestSeason}
               </p>
               <p className="font-medium text-white">{destination.bestSeason}</p>
             </div>
@@ -290,7 +356,7 @@ export default async function DestinationDetailPage({ params }: PageProps) {
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-400">
                 <ShieldCheck size={14} className="text-primary" />
-                Permits
+                {copy.permits}
               </p>
               <p className="font-medium text-white">{destination.permits}</p>
             </div>
@@ -298,7 +364,7 @@ export default async function DestinationDetailPage({ params }: PageProps) {
 
           <div className="mt-8">
             <p className="mb-3 text-xs font-semibold tracking-[0.18em] text-zinc-400 uppercase">
-              Trail Gallery
+              {copy.trailGallery}
             </p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {galleryImages.map((src, idx) => (
@@ -315,10 +381,10 @@ export default async function DestinationDetailPage({ params }: PageProps) {
           </div>
 
           <Link
-            href={`/packages/${destination.id}`}
+            href={bookingHref}
             className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white hover:bg-primary/90"
           >
-            Book This Trip
+            {copy.book}
           </Link>
         </div>
       </section>

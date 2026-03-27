@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   /* 1. MAP GEIST TO TAILWIND'S FONT-SANS */
   --font-sans: var(--font-geist-sans);
@@ -57,7 +59,7 @@
   --primary-foreground: #ffffff;
   --secondary: #e02b34;
   --secondary-foreground: #ffffff;
-  
+
   --muted: oklch(0.967 0.001 286.375);
   --muted-foreground: oklch(0.552 0.016 285.938);
   --accent: oklch(0.967 0.001 286.375);
@@ -92,7 +94,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
-  
+
   --primary: #084ea8;
   --primary-foreground: #ffffff;
   --secondary: #e02b34;
@@ -126,11 +128,11 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
   }
-  
+
   * {
     @apply border-border outline-ring/50;
   }
-  
+
   /* 2. ENSURE BODY USES FONT-SANS BY DEFAULT */
   body {
     @apply bg-background text-foreground font-sans;

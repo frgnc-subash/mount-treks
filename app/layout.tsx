@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
-import WhatsAppFloat from "@/components/whatsapp-float";
+import SiteChrome from "@/components/site-chrome";
 import {
   absoluteUrl,
   DEFAULT_OG_IMAGE_PATH,
@@ -146,12 +144,7 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <Navbar />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <WhatsAppFloat />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

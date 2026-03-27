@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname, useSearchParams } from "next/navigation";
 // 1. Import Lucide Icons
 import {
   Facebook,
@@ -11,10 +12,83 @@ import {
   MapPin,
   ArrowRight,
 } from "lucide-react";
+import { resolveLocale } from "@/lib/i18n";
 
 export default function Footer() {
-  const t = (s: string) => s;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const locale = resolveLocale(searchParams.get("lang"));
   const currentYear = new Date().getFullYear();
+  const withLang = (path: string) => {
+    if (locale === "en") return path;
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}lang=${locale}`;
+  };
+
+  const copy =
+    locale === "zh"
+      ? {
+          about:
+            "我们专注于高海拔徒步探险，以安全、专业和在地经验带你深入壮丽喜马拉雅。",
+          menu: "菜单",
+          office: "办公室",
+          payment: "我们支持多种国际支付方式。",
+          rights: "版权所有",
+          born: "源自尼泊尔",
+          terms: "服务条款",
+          privacy: "隐私政策",
+          nav: {
+            home: "首页",
+            destinations: "目的地",
+            guide: "指南",
+            packages: "产品",
+            contact: "联系",
+          },
+          addressLine1: "泰米尔区 - Yapikhya Marg",
+          addressLine2: "加德满都，尼泊尔",
+        }
+      : locale === "es"
+        ? {
+            about:
+              "Nos especializamos en trekking de altura, con rutas seguras y experiencias inolvidables en el Himalaya.",
+            menu: "Menú",
+            office: "Oficina",
+            payment: "Aceptamos pagos internacionales.",
+            rights: "Todos los derechos reservados",
+            born: "Nacido en Nepal",
+            terms: "Términos del servicio",
+            privacy: "Política de privacidad",
+            nav: {
+              home: "Inicio",
+              destinations: "Destinos",
+              guide: "Guía",
+              packages: "Paquetes",
+              contact: "Contacto",
+            },
+            addressLine1: "Área de Thamel - Yapikhya Marg",
+            addressLine2: "Katmandú, Nepal",
+          }
+        : {
+            about:
+              "We specialize in high-altitude trekking adventures, ensuring safe and unforgettable journeys through the majestic Himalayas.",
+            menu: "Menu",
+            office: "Office",
+            payment: "We accept all international payments.",
+            rights: "All rights reserved",
+            born: "Born in Nepal",
+            terms: "Terms of Service",
+            privacy: "Privacy Policy",
+            nav: {
+              home: "Home",
+              destinations: "Destinations",
+              guide: "Guide",
+              packages: "Packages",
+              contact: "Contact Us",
+            },
+            addressLine1: "Thamel Area - Yapikhya Marg",
+            addressLine2: "Kathmandu, Nepal",
+          };
+
   const paymentMethods = [
     { key: "Visa", src: "https://cdn.simpleicons.org/visa" },
     { key: "Mastercard", src: "https://cdn.simpleicons.org/mastercard" },
@@ -25,12 +99,20 @@ export default function Footer() {
   ];
 
   const navLinks = [
-    { name: t("Home"), path: "/" },
-    { name: t("Destinations"), path: "/destinations" },
-    { name: t("Guide"), path: "/guide" },
-    { name: t("Packages"), path: "/packages" },
-    { name: t("Contact Us"), path: "/contact" },
+    { name: copy.nav.home, path: "/" },
+    { name: copy.nav.destinations, path: "/destinations" },
+    { name: copy.nav.guide, path: "/guide" },
+    { name: copy.nav.packages, path: "/packages" },
+    { name: copy.nav.contact, path: "/contact" },
   ];
+
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up")
+  ) {
+    return null;
+  }
 
   return (
     <footer className="bg-[#050505] border-t border-white/5 pt-16 md:pt-20 pb-10 relative">
@@ -38,7 +120,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16 md:mb-20">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-5 space-y-6 md:space-y-8">
-            <Link href="/" className="flex items-center gap-3 group w-fit">
+            <Link href={withLang("/")} className="flex items-center gap-3 group w-fit">
               <div className="relative h-8 w-8 md:h-9 md:w-9 lg:h-10 lg:w-10">
                 <Image
                   src="/logo.webp"
@@ -58,8 +140,7 @@ export default function Footer() {
             </Link>
 
             <p className="text-zinc-500 text-sm leading-relaxed max-w-sm">
-              We specialize in high-altitude trekking adventures, ensuring safe
-              and unforgettable journeys through the majestic Himalayas.
+              {copy.about}
             </p>
 
             <div className="flex gap-3">
@@ -86,13 +167,13 @@ export default function Footer() {
 
           <div className="col-span-1 md:col-span-3">
             <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-zinc-600 mb-6 md:mb-8">
-              {t("Menu")}
+              {copy.menu}
             </h4>
             <ul className="space-y-4">
               {navLinks.map((link) => (
                 <li key={link.name}>
                   <Link
-                    href={link.path}
+                    href={withLang(link.path)}
                     className="text-sm font-medium text-zinc-400 hover:text-white transition-all duration-300 flex items-center group gap-2"
                   >
                     <ArrowRight className="h-3 w-3 text-primary opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
@@ -106,7 +187,7 @@ export default function Footer() {
           {/* Office Section */}
           <div className="col-span-1 md:col-span-3">
             <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-zinc-600 mb-6 md:mb-8">
-              {t("Office")}
+              {copy.office}
             </h4>
             <div className="space-y-6">
               <a
@@ -157,8 +238,8 @@ export default function Footer() {
                   />
                 </div>
                 <span className="leading-relaxed">
-                  Thamel Area - Yapikhya Marg,
-                  <br /> Kathmandu, Nepal
+                  {copy.addressLine1},
+                  <br /> {copy.addressLine2}
                 </span>
               </div>
 
@@ -168,7 +249,7 @@ export default function Footer() {
 
         <div className="mb-10 flex flex-col gap-2">
           <p className="text-xs font-medium text-zinc-500">
-            We accept all international payments.
+            {copy.payment}
           </p>
           <div className="flex flex-wrap gap-2">
             {paymentMethods.map((method) => (
@@ -191,11 +272,23 @@ export default function Footer() {
 
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest text-center md:text-left">
-            © {currentYear} ALTIGO HIMALAYAN TREKS. {t("All rights reserved")}.
+            © {currentYear} ALTIGO HIMALAYAN TREKS. {copy.rights}.
           </p>
           <div className="flex items-center gap-4">
+            <Link
+              href={withLang("/terms-of-service")}
+              className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              {copy.terms}
+            </Link>
+            <Link
+              href={withLang("/privacy-policy")}
+              className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              {copy.privacy}
+            </Link>
             <span className="text-[9px] font-black uppercase tracking-[0.6em] text-zinc-800 select-none">
-              {t("Born in Nepal")}
+              {copy.born}
             </span>
           </div>
         </div>

@@ -40,9 +40,56 @@ const getLowestPrice = (prices: { label: string; price: string }[]) =>
 
 type TopPackagesCarouselProps = {
   packages: TrekPackage[];
+  locale?: "en" | "es" | "zh";
 };
 
-export default function TopPackagesCarousel({ packages }: TopPackagesCarouselProps) {
+export default function TopPackagesCarousel({
+  packages,
+  locale = "en",
+}: TopPackagesCarouselProps) {
+  const copy =
+    locale === "zh"
+      ? {
+          prev: "上一组",
+          next: "下一组",
+          topChoice: "精选",
+          featured: "推荐",
+          save: "立省",
+          original: "起价参考",
+          discount: "下单可享优惠",
+          duration: "行程",
+          altitude: "海拔",
+          difficulty: "难度",
+          viewPackages: "查看产品",
+        }
+      : locale === "es"
+        ? {
+            prev: "Anterior",
+            next: "Siguiente",
+            topChoice: "Destacado",
+            featured: "Recomendado",
+            save: "Ahorra",
+            original: "Precio inicial",
+            discount: "Descuento disponible al reservar",
+            duration: "Duración",
+            altitude: "Altitud",
+            difficulty: "Dificultad",
+            viewPackages: "Ver paquetes",
+          }
+        : {
+            prev: "Previous top packages",
+            next: "Next top packages",
+            topChoice: "Top Choice",
+            featured: "Featured",
+            save: "Save",
+            original: "Original starting price",
+            discount: "Discount available at booking",
+            duration: "Duration",
+            altitude: "Altitude",
+            difficulty: "Difficulty",
+            viewPackages: "View Packages",
+          };
+  const packagesHref = locale === "en" ? "/packages" : `/packages?lang=${locale}`;
   const [startIndex, setStartIndex] = useState(0);
   const [cardsPerView, setCardsPerView] = useState(3);
 
@@ -85,7 +132,7 @@ export default function TopPackagesCarousel({ packages }: TopPackagesCarouselPro
           onClick={() => setStartIndex((prev) => Math.max(0, prev - 1))}
           disabled={!canPrev}
           className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/[0.05] text-white transition enabled:hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-35"
-          aria-label="Previous top packages"
+          aria-label={copy.prev}
         >
           <ChevronLeft className="h-4.5 w-4.5" />
         </button>
@@ -94,7 +141,7 @@ export default function TopPackagesCarousel({ packages }: TopPackagesCarouselPro
           onClick={() => setStartIndex((prev) => Math.min(maxStart, prev + 1))}
           disabled={!canNext}
           className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/[0.05] text-white transition enabled:hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-35"
-          aria-label="Next top packages"
+          aria-label={copy.next}
         >
           <ChevronRight className="h-4.5 w-4.5" />
         </button>
@@ -104,7 +151,8 @@ export default function TopPackagesCarousel({ packages }: TopPackagesCarouselPro
         {visiblePackages.map((packageData) => {
           const basePrice = getLowestPrice(packageData.pricing);
           const discountPct = discountById[packageData.id] ?? 8;
-          const badge = packageData.id === "everest-base-camp" ? "Top Choice" : "Featured";
+          const badge =
+            packageData.id === "everest-base-camp" ? copy.topChoice : copy.featured;
           const highlighted = packageData.id === "everest-base-camp";
 
           return (
@@ -116,7 +164,7 @@ export default function TopPackagesCarousel({ packages }: TopPackagesCarouselPro
             >
               <div className="relative h-48 shrink-0 overflow-hidden">
                 <img
-                  src={imageByPackageId[packageData.id] || "/backgrounds/bg1.jpeg"}
+                  src={packageData.image || imageByPackageId[packageData.id] || "/backgrounds/bg1.jpeg"}
                   alt={packageData.name}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
@@ -130,7 +178,7 @@ export default function TopPackagesCarousel({ packages }: TopPackagesCarouselPro
                 </p>
                 <p className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-amber-200/70 bg-amber-300 px-2.5 py-1 text-[10px] font-bold tracking-[0.08em] text-zinc-900 uppercase shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
                   <Tag className="h-3 w-3 text-zinc-900" />
-                  Save {discountPct}%
+                  {copy.save} {discountPct}%
                 </p>
               </div>
 
@@ -140,16 +188,22 @@ export default function TopPackagesCarousel({ packages }: TopPackagesCarouselPro
                   ${basePrice.toLocaleString()}
                 </p>
                 <p className="mt-1 text-[11px] font-semibold tracking-[0.08em] text-zinc-400 uppercase">
-                  Original starting price
+                  {copy.original}
                 </p>
                 <p className="mt-1 text-xs font-semibold text-amber-300">
-                  Discount available at booking
+                  {copy.discount}
                 </p>
 
                 <div className="mt-5 space-y-2 text-sm text-zinc-300">
-                  <p>Duration: {packageData.duration}</p>
-                  <p>Altitude: {packageData.altitude}</p>
-                  <p>Difficulty: {packageData.difficulty}</p>
+                  <p>
+                    {copy.duration}: {packageData.duration}
+                  </p>
+                  <p>
+                    {copy.altitude}: {packageData.altitude}
+                  </p>
+                  <p>
+                    {copy.difficulty}: {packageData.difficulty}
+                  </p>
                 </div>
                 <p className="mt-5 h-[92px] overflow-hidden text-sm leading-7 text-zinc-400">
                   {packageData.summary}
@@ -157,10 +211,10 @@ export default function TopPackagesCarousel({ packages }: TopPackagesCarouselPro
 
                 <div className="mt-auto pt-5">
                   <Link
-                    href="/packages"
+                    href={packagesHref}
                     className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
                   >
-                    View Packages
+                    {copy.viewPackages}
                   </Link>
                 </div>
               </div>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Mountain,
   MapPin,
@@ -16,7 +17,8 @@ import {
 } from "lucide-react";
 import DestinationMap from "@/components/destination-map-client";
 import SearchField from "@/components/search-field";
-import { destinations } from "@/lib/destinations-data";
+import { localizeDestinations, resolveLocale } from "@/lib/i18n";
+import { destinations, type Destination } from "@/lib/destinations-data";
 
 type DropdownOption = {
   value: string;
@@ -95,12 +97,92 @@ function FilterDropdown({
   );
 }
 
-export default function DestinationsPage() {
+export default function DestinationsPage({
+  embeddedInDashboard = false,
+}: {
+  embeddedInDashboard?: boolean;
+}) {
+  const searchParams = useSearchParams();
+  const locale = resolveLocale(searchParams.get("lang"));
+  const withLang = (path: string) => {
+    if (locale === "en") return path;
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}lang=${locale}`;
+  };
+  const sortByLocale = (items: Destination[]) => {
+    const sortLocale = locale === "zh" ? "zh" : locale === "es" ? "es" : "en";
+    return [...items].sort((a, b) => a.name.localeCompare(b.name, sortLocale));
+  };
+  const [destinationsData, setDestinationsData] = useState<Destination[]>(() =>
+    sortByLocale(localizeDestinations(destinations, locale)),
+  );
   const [query, setQuery] = useState("");
   const [difficulty, setDifficulty] = useState("all");
   const [season, setSeason] = useState("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const guideHref = withLang("/guide");
+
+  const copy =
+    locale === "zh"
+      ? {
+          refine: "筛选目的地",
+          guide: "指南",
+          favorites: "收藏",
+          clear: "清除",
+          search: "搜索",
+          searchPlaceholder: "搜索目的地或区域（如：珠峰、安娜普尔纳、马南）",
+          difficulty: "难度",
+          season: "季节",
+          allDifficulties: "全部难度",
+          moderate: "中等",
+          challenging: "困难",
+          allSeasons: "全部季节",
+          spring: "春季（3-5月）",
+          autumn: "秋季（10-11月）",
+          lateMonsoon: "后季风/秋季（9-11月）",
+          maxElevation: "最高海拔",
+          viewInfo: "查看详情",
+        }
+      : locale === "es"
+        ? {
+            refine: "Filtrar destinos",
+            guide: "Guía",
+            favorites: "Favoritos",
+            clear: "Limpiar",
+            search: "Buscar",
+            searchPlaceholder: "Busca destino o región (ej. Everest, Annapurna, Manang)",
+            difficulty: "Dificultad",
+            season: "Temporada",
+            allDifficulties: "Todas las dificultades",
+            moderate: "Moderado",
+            challenging: "Difícil",
+            allSeasons: "Todas las temporadas",
+            spring: "Primavera (mar-may)",
+            autumn: "Otoño (oct-nov)",
+            lateMonsoon: "Posmonzón / Otoño (sep-nov)",
+            maxElevation: "Altitud máxima",
+            viewInfo: "Ver info",
+          }
+        : {
+            refine: "Refine Destinations",
+            guide: "Guide",
+            favorites: "Favorites",
+            clear: "Clear",
+            search: "Search",
+            searchPlaceholder: "Search destination or region (e.g., Everest, Annapurna, Manang)",
+            difficulty: "Difficulty",
+            season: "Season",
+            allDifficulties: "All Difficulties",
+            moderate: "Moderate",
+            challenging: "Challenging",
+            allSeasons: "All Seasons",
+            spring: "Spring (Mar-May)",
+            autumn: "Autumn (Oct-Nov)",
+            lateMonsoon: "Late Monsoon / Autumn (Sep-Nov)",
+            maxElevation: "Max elevation",
+            viewInfo: "View Info",
+          };
 
   useEffect(() => {
     try {
@@ -119,18 +201,57 @@ export default function DestinationsPage() {
     localStorage.setItem("altigo-favorite-destinations", JSON.stringify(favorites));
   }, [favorites]);
 
+  useEffect(() => {
+    setDestinationsData(sortByLocale(localizeDestinations(destinations, locale)));
+  }, [locale]);
+
+  useEffect(() => {
+    let canceled = false;
+
+    const loadDestinations = async () => {
+      try {
+        const response = await fetch(`/api/public/destinations?lang=${locale}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const payload = (await response.json()) as { destinations: Destination[] };
+        if (!canceled && Array.isArray(payload.destinations)) {
+          setDestinationsData(payload.destinations);
+        }
+      } catch {
+        // Keep static fallback on request failures.
+      }
+    };
+
+    loadDestinations();
+
+    return () => {
+      canceled = true;
+    };
+  }, []);
+
   const toggleFavorite = (id: string) => {
     setFavorites((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
   };
 
+  const normalizedDifficulty = (value: string) => {
+    const lower = value.toLowerCase();
+    if (/challenging|偏难|困难|dif[ií]cil/.test(value) || lower.includes("challenging")) {
+      return "challenging";
+    }
+    if (/moderate|中等|轻松|easy|moderado/.test(value) || lower.includes("moderate")) {
+      return "moderate";
+    }
+    return "moderate";
+  };
+
   const filteredDestinations = useMemo(() => {
-    return destinations.filter((item) => {
+    return destinationsData.filter((item) => {
       const matchesQuery =
         item.name.toLowerCase().includes(query.toLowerCase()) ||
         item.region.toLowerCase().includes(query.toLowerCase());
       const matchesDifficulty =
-        difficulty === "all" ||
-        item.difficulty.toLowerCase().includes(difficulty.toLowerCase());
+        difficulty === "all" || normalizedDifficulty(item.difficulty) === difficulty;
       const matchesSeason =
         season === "all" ||
         item.bestSeason.toLowerCase().includes(season.toLowerCase());
@@ -138,7 +259,7 @@ export default function DestinationsPage() {
 
       return matchesQuery && matchesDifficulty && matchesSeason && matchesFavorites;
     });
-  }, [query, difficulty, season, favoritesOnly, favorites]);
+  }, [query, difficulty, season, favoritesOnly, favorites, destinationsData]);
   const hasActiveFilters =
     Boolean(query.trim()) || difficulty !== "all" || season !== "all" || favoritesOnly;
 
@@ -150,30 +271,45 @@ export default function DestinationsPage() {
   };
 
   return (
-    <main className="overflow-x-hidden bg-background text-foreground">
-      <section className="mx-auto w-full max-w-7xl overflow-x-hidden px-5 pb-16 pt-0 sm:px-8">
-        <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-          <DestinationMap
-            locations={hasActiveFilters ? filteredDestinations : destinations}
-            className="h-[68vh] min-h-[440px] w-full rounded-none border-0 shadow-none"
-          />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background via-background/70 to-transparent blur-md" />
-        </div>
+    <main className={embeddedInDashboard ? "overflow-x-hidden text-foreground" : "overflow-x-hidden bg-background text-foreground"}>
+      <section
+        className={
+          embeddedInDashboard
+            ? "mx-auto w-full max-w-6xl overflow-x-hidden px-0 pb-4 pt-0"
+            : "mx-auto w-full max-w-7xl overflow-x-hidden px-5 pb-16 pt-0 sm:px-8"
+        }
+      >
+        {embeddedInDashboard ? (
+          <div className="overflow-hidden rounded-2xl border border-border bg-card/35 shadow-[0_14px_34px_rgba(0,0,0,0.25)]">
+            <DestinationMap
+              locations={hasActiveFilters ? filteredDestinations : destinationsData}
+              className="h-[52vh] min-h-[360px] w-full rounded-none border-0 shadow-none"
+            />
+          </div>
+        ) : (
+          <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
+            <DestinationMap
+              locations={hasActiveFilters ? filteredDestinations : destinationsData}
+              className="h-[68vh] min-h-[440px] w-full rounded-none border-0 shadow-none"
+            />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background via-background/70 to-transparent blur-md" />
+          </div>
+        )}
 
         <div className="relative z-[120] mt-7 rounded-2xl bg-card/45 p-4 shadow-[0_12px_28px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:p-5">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
               <SlidersHorizontal size={16} className="text-primary" />
-              Refine Destinations
+              {copy.refine}
             </div>
             <div className="w-full sm:w-auto">
               <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end sm:gap-3">
                 <Link
-                  href="/guide"
+                  href={guideHref}
                   className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium text-muted-foreground ring-1 ring-white/12 transition hover:text-foreground sm:h-8 sm:w-auto"
                 >
                   <BookOpen className="h-3.5 w-3.5" />
-                  Guide
+                  {copy.guide}
                 </Link>
                 <button
                   type="button"
@@ -185,7 +321,7 @@ export default function DestinationsPage() {
                   }`}
                 >
                   <Heart className={`h-3.5 w-3.5 ${favoritesOnly ? "fill-white" : ""}`} />
-                  Favorites {favorites.length ? `(${favorites.length})` : ""}
+                  {copy.favorites} {favorites.length ? `(${favorites.length})` : ""}
                 </button>
                 <button
                   type="button"
@@ -193,7 +329,7 @@ export default function DestinationsPage() {
                   className="col-span-2 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium text-muted-foreground ring-1 ring-white/12 hover:text-foreground sm:col-span-1 sm:h-8 sm:w-auto"
                 >
                   <RotateCcw size={12} />
-                  Clear
+                  {copy.clear}
                 </button>
               </div>
             </div>
@@ -202,45 +338,45 @@ export default function DestinationsPage() {
           <div className="grid gap-3 lg:grid-cols-[1.8fr_1fr_1fr]">
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Search
+                {copy.search}
               </span>
               <SearchField
                 value={query}
                 onChange={setQuery}
-                placeholder="Search destination or region (e.g., Everest, Annapurna, Manang)"
+                placeholder={copy.searchPlaceholder}
                 ariaLabel="Search destinations"
               />
             </label>
 
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Difficulty
+                {copy.difficulty}
               </span>
               <FilterDropdown
                 value={difficulty}
                 onChange={setDifficulty}
-                placeholder="All Difficulties"
+                placeholder={copy.allDifficulties}
                 options={[
-                  { value: "all", label: "All Difficulties" },
-                  { value: "moderate", label: "Moderate" },
-                  { value: "challenging", label: "Challenging" },
+                  { value: "all", label: copy.allDifficulties },
+                  { value: "moderate", label: copy.moderate },
+                  { value: "challenging", label: copy.challenging },
                 ]}
               />
             </label>
 
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Season
+                {copy.season}
               </span>
               <FilterDropdown
                 value={season}
                 onChange={setSeason}
-                placeholder="All Seasons"
+                placeholder={copy.allSeasons}
                 options={[
-                  { value: "all", label: "All Seasons" },
-                  { value: "mar", label: "Spring (Mar-May)" },
-                  { value: "oct", label: "Autumn (Oct-Nov)" },
-                  { value: "sep", label: "Late Monsoon / Autumn (Sep-Nov)" },
+                  { value: "all", label: copy.allSeasons },
+                  { value: "mar", label: copy.spring },
+                  { value: "oct", label: copy.autumn },
+                  { value: "sep", label: copy.lateMonsoon },
                 ]}
               />
             </label>
@@ -300,16 +436,16 @@ export default function DestinationsPage() {
                     </p>
                     <p className="flex items-center gap-2 sm:col-span-2">
                       <Mountain className="h-4 w-4 text-primary" />
-                      Max elevation: {item.elevation}
+                      {copy.maxElevation}: {item.elevation}
                     </p>
                   </div>
 
                   <div className="pt-4">
                     <Link
-                      href={`/destinations/${item.id}`}
+                      href={withLang(`/destinations/${item.id}`)}
                       className="inline-flex h-10 items-center justify-center gap-1 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
-                      View Info
+                      {copy.viewInfo}
                       <ArrowRight size={13} />
                     </Link>
                   </div>

@@ -3,12 +3,31 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { dashboardHomeForRole } from "@/lib/auth/redirect";
+import { resolveLocale } from "@/lib/i18n";
+import LanguageSelector from "@/components/language-selector";
+
+type AuthUser = {
+  id: string;
+  fullName: string;
+  email: string;
+  role: "CUSTOMER" | "ADMIN";
+  avatarUrl: string | null;
+};
+
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "U";
+  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+  return `${parts[0].slice(0, 1)}${parts[1].slice(0, 1)}`.toUpperCase();
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({
     left: 0,
     width: 0,
@@ -16,9 +35,49 @@ export default function Navbar() {
   });
 
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const locale = resolveLocale(searchParams.get("lang"));
   const navRef = useRef<HTMLDivElement>(null);
 
-  const t = (s: string) => s;
+  const copy =
+    locale === "zh"
+      ? {
+          home: "首页",
+          destinations: "目的地",
+          packages: "产品",
+          contact: "联系",
+          signIn: "登录",
+          profile: "账户",
+          navigation: "导航",
+          language: "语言",
+        }
+      : locale === "es"
+        ? {
+            home: "Inicio",
+            destinations: "Destinos",
+            packages: "Paquetes",
+            contact: "Contacto",
+            signIn: "Ingresar",
+            profile: "Perfil",
+            navigation: "Navegación",
+            language: "Idioma",
+          }
+        : {
+            home: "Home",
+            destinations: "Destinations",
+            packages: "Packages",
+            contact: "Contact Us",
+            signIn: "Sign In",
+            profile: "Profile",
+            navigation: "Navigation",
+            language: "Language",
+          };
+
+  const withLang = (path: string) => {
+    if (locale === "en") return path;
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}lang=${locale}`;
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -73,17 +132,53 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    let canceled = false;
+
+    const loadCurrentUser = async () => {
+      try {
+        const response = await fetch("/api/auth/me", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = (await response.json()) as { user: AuthUser | null };
+        if (!canceled) {
+          setAuthUser(payload.user);
+        }
+      } catch {
+        if (!canceled) {
+          setAuthUser(null);
+        }
+      }
+    };
+
+    loadCurrentUser();
+
+    return () => {
+      canceled = true;
+    };
+  }, [pathname]);
+
   const navItems = [
-    { label: t("Home"), path: "/" },
-    { label: t("Destinations"), path: "/destinations" },
-    { label: t("Packages"), path: "/packages" },
-    { label: t("Contact Us"), path: "/contact" },
+    { label: copy.home, path: "/" },
+    { label: copy.destinations, path: "/destinations" },
+    { label: copy.packages, path: "/packages" },
+    { label: copy.contact, path: "/contact" },
   ];
+
+  const dashboardPath = authUser ? dashboardHomeForRole(authUser.role) : "/dashboard";
 
   const isItemActive = (item: (typeof navItems)[number]) =>
     item.path === "/"
       ? pathname === "/"
       : pathname === item.path || pathname.startsWith(`${item.path}/`);
+
+  const hideOnDashboard =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up");
+
+  if (hideOnDashboard) {
+    return null;
+  }
 
   const commonLinkClasses =
     "relative px-4 lg:px-5 py-2 text-sm font-medium transition-all duration-300 rounded-lg flex items-center justify-center gap-2";
@@ -101,7 +196,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between">
             <div className="flex w-full items-center justify-between lg:w-auto lg:flex-none">
               <Link
-                href="/"
+                href={withLang("/")}
                 className="relative flex shrink-0 items-center gap-3 group"
               >
                 <div className="relative h-8 w-8 md:h-9 md:w-9 lg:h-10 lg:w-10">
@@ -154,7 +249,7 @@ export default function Navbar() {
                 return (
                   <Link
                     key={item.path}
-                    href={item.path}
+                    href={withLang(item.path)}
                     onMouseEnter={(e) => handleMouseEnter(e.currentTarget)}
                     className={`${commonLinkClasses} w-auto ${
                       isActive ? "font-bold text-secondary" : "text-white/90 hover:text-white"
@@ -167,18 +262,39 @@ export default function Navbar() {
             </div>
 
             <div className="z-40 hidden items-center justify-end gap-2 lg:flex lg:flex-none">
-              <Link
-                href="/guide"
-                className="rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-[10px] font-black tracking-widest text-white uppercase transition-all active:scale-95 hover:bg-white/10"
-              >
-                {t("Guide")}
-              </Link>
-              <Link
-                href="/booking"
-                className="rounded-full bg-primary px-5 py-2.5 text-[10px] font-black tracking-widest text-white uppercase shadow-lg shadow-primary/20 transition-all active:scale-95 hover:bg-primary/90"
-              >
-                {t("Book Now")}
-              </Link>
+              <LanguageSelector
+                align="end"
+                triggerClassName="h-9 rounded-full border-white/20 bg-white/5 px-2 text-white"
+                contentClassName="rounded-xl"
+                size="sm"
+              />
+              {authUser ? (
+                <>
+                  <Link
+                    href={withLang(dashboardPath)}
+                    aria-label="Open dashboard profile"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10"
+                  >
+                    {authUser.avatarUrl ? (
+                      <img
+                        src={authUser.avatarUrl}
+                        alt={authUser.fullName}
+                        referrerPolicy="no-referrer"
+                        className="h-9 w-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xs font-bold text-white">{getInitials(authUser.fullName)}</span>
+                    )}
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href={withLang("/sign-in")}
+                  className="rounded-full bg-primary px-5 py-2.5 text-[10px] font-black tracking-widest text-white uppercase shadow-lg shadow-primary/20 transition-all active:scale-95 hover:bg-primary/90"
+                >
+                  {copy.signIn}
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -205,7 +321,7 @@ export default function Navbar() {
           <div className="flex h-full flex-col px-4 pb-6 pt-24">
             <div className="mb-4 px-2">
               <p className="text-[10px] font-semibold tracking-[0.22em] text-zinc-400 uppercase">
-                Navigation
+                {copy.navigation}
               </p>
             </div>
 
@@ -215,7 +331,7 @@ export default function Navbar() {
                 return (
                   <Link
                     key={item.path}
-                    href={item.path}
+                    href={withLang(item.path)}
                     onClick={() => setIsOpen(false)}
                     className={`inline-flex w-full items-center rounded-xl px-4 py-3.5 text-sm font-semibold transition-colors ${
                       isActive
@@ -232,20 +348,45 @@ export default function Navbar() {
             <div className="my-4 h-px bg-white/10" />
 
             <div className="grid grid-cols-2 gap-2">
-              <Link
-                href="/guide"
-                onClick={() => setIsOpen(false)}
-                className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-white/20 bg-white/[0.03] text-[11px] font-black tracking-[0.12em] text-white uppercase transition-colors hover:bg-white/[0.08]"
-              >
-                {t("Guide")}
-              </Link>
-              <Link
-                href="/booking"
-                onClick={() => setIsOpen(false)}
-                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary text-[11px] font-black tracking-[0.18em] text-white uppercase transition-colors hover:bg-primary/90"
-              >
-                {t("Book Now")}
-              </Link>
+              <div className="col-span-2">
+                <LanguageSelector
+                  align="start"
+                  triggerClassName="h-10 w-full rounded-xl border-white/20 bg-white/[0.03] px-2 text-white sm:h-11"
+                  contentClassName="rounded-xl"
+                  size="sm"
+                />
+              </div>
+              {authUser ? (
+                <>
+                  <Link
+                    href={withLang(dashboardPath)}
+                    onClick={() => setIsOpen(false)}
+                    className="col-span-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.03] text-[11px] font-black tracking-[0.12em] text-white uppercase transition-colors hover:bg-white/[0.08]"
+                  >
+                    {authUser.avatarUrl ? (
+                      <img
+                        src={authUser.avatarUrl}
+                        alt={authUser.fullName}
+                        referrerPolicy="no-referrer"
+                        className="h-6 w-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                        {getInitials(authUser.fullName)}
+                      </span>
+                    )}
+                    {copy.profile}
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href={withLang("/sign-in")}
+                  onClick={() => setIsOpen(false)}
+                  className="col-span-2 inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary text-[11px] font-black tracking-[0.18em] text-white uppercase transition-colors hover:bg-primary/90"
+                >
+                  {copy.signIn}
+                </Link>
+              )}
             </div>
           </div>
         </aside>

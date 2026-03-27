@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { trekPackagesById } from "@/lib/packages-data";
 import PackageDetails from "@/components/package-details";
+import { getPackageById } from "@/lib/content";
+import { resolveLocale } from "@/lib/i18n";
 import { absoluteUrl, getPackageImagePath, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ lang?: string }>;
 }
 
 const parsePrice = (value: string) => Number(value.replace(/[^0-9.]/g, "") || 0);
@@ -16,9 +18,14 @@ const getLowestPackagePrice = (prices: { label: string; price: string }[]) =>
     return min === 0 || amount < min ? amount : min;
   }, 0);
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const item = trekPackagesById[id];
+  const query = await searchParams;
+  const locale = resolveLocale(query?.lang);
+  const item = await getPackageById(id, locale);
 
   if (!item) {
     return {
@@ -32,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${item.name} in Nepal`;
   const description = `${item.summary} Duration: ${item.duration}. Max altitude: ${item.altitude}. Difficulty: ${item.difficulty}.`;
-  const image = absoluteUrl(getPackageImagePath(item.id));
+  const image = absoluteUrl(item.image || getPackageImagePath(item.id));
   const canonicalPath = `/packages/${item.id}`;
 
   return {
@@ -64,9 +71,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function PackageDetailPage({ params }: PageProps) {
+export default async function PackageDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const item = trekPackagesById[id];
+  const query = await searchParams;
+  const locale = resolveLocale(query?.lang);
+  const item = await getPackageById(id, locale);
 
   if (!item) {
     notFound();
@@ -80,7 +89,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
     name: item.name,
     description: item.summary,
     url: `${SITE_URL}/packages/${item.id}`,
-    image: absoluteUrl(getPackageImagePath(item.id)),
+    image: absoluteUrl(item.image || getPackageImagePath(item.id)),
     touristType: item.idealFor,
     provider: {
       "@type": "TravelAgency",
@@ -131,7 +140,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <PackageDetails item={item} />
+      <PackageDetails item={item} locale={locale} />
     </>
   );
 }
