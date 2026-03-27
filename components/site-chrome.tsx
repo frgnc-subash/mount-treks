@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { usePathname } from "next/navigation"
 
 import CookieConsentBanner from "@/components/cookie-consent-banner"
@@ -24,20 +25,30 @@ export default function SiteChrome({
         <main id="main-content" className="flex-1">
           {children}
         </main>
-        <CookieConsentBanner />
+        <Suspense fallback={null}>
+          <CookieConsentBanner />
+        </Suspense>
       </>
     )
   }
 
   return (
     <>
-      <Navbar />
+      <Suspense fallback={null}>
+        <Navbar />
+      </Suspense>
       <main id="main-content" className="flex-1">
         {children}
       </main>
-      <Footer />
-      <GuideFloat />
-      <CookieConsentBanner />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
+      <Suspense fallback={null}>
+        <GuideFloat />
+      </Suspense>
+      <Suspense fallback={null}>
+        <CookieConsentBanner />
+      </Suspense>
     </>
   )
 }
