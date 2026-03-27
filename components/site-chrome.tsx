@@ -14,10 +14,12 @@ export default function SiteChrome({
   children: React.ReactNode
 }>) {
   const pathname = usePathname()
+  const isNotFoundRoute = pathname === "/404" || pathname === "/_not-found"
   const hideMarketingChrome =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up")
+    pathname.startsWith("/sign-up") ||
+    isNotFoundRoute
 
   if (hideMarketingChrome) {
     return (
@@ -25,9 +27,11 @@ export default function SiteChrome({
         <main id="main-content" className="flex-1">
           {children}
         </main>
-        <Suspense fallback={null}>
-          <CookieConsentBanner />
-        </Suspense>
+        {!isNotFoundRoute ? (
+          <Suspense fallback={null}>
+            <CookieConsentBanner />
+          </Suspense>
+        ) : null}
       </>
     )
   }
