@@ -20,7 +20,7 @@ npm run db:seed
 
 ## Vercel production deploys
 
-Use this build command in Vercel so production deploys apply pending Prisma migrations automatically before building:
+Use this build command in Vercel so production deploys apply pending Prisma migrations automatically before building. Preview deployments will skip migrations:
 
 ```bash
 npm run vercel-build
