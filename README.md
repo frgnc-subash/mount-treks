@@ -18,6 +18,14 @@ npm run db:seed
 
 `npm run db:seed` now requires `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_NAME` to be set and will not fall back to default credentials.
 
+## Vercel production deploys
+
+Use this build command in Vercel so production deploys apply pending Prisma migrations automatically before building:
+
+```bash
+npm run vercel-build
+```
+
 If migration still reports missing `DATABASE_URL`, run:
 
 ```bash
