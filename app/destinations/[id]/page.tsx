@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock3, Mountain, MapPin, ShieldCheck, CalendarDays } from "lucide-react";
+import BookingEntryButton from "@/components/booking-entry-button";
 import DestinationDetailMap from "@/components/destination-detail-map-client";
 import DestinationWeather from "@/components/destination-weather";
 import { getDestinationById } from "@/lib/content";
@@ -380,12 +381,12 @@ export default async function DestinationDetailPage({
             </div>
           </div>
 
-          <Link
-            href={bookingHref}
+          <BookingEntryButton
+            bookingPath={bookingHref}
             className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white hover:bg-primary/90"
           >
             {copy.book}
-          </Link>
+          </BookingEntryButton>
         </div>
       </section>
     </main>

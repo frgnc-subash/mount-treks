@@ -23,6 +23,13 @@ type CustomerRow = {
   latestBookingStatus: "PENDING" | "APPROVED" | "REJECTED" | null
   latestBookingId: string | null
   latestBookingAmount: number
+  bookings: Array<{
+    id: string
+    packageName: string
+    status: "PENDING" | "APPROVED" | "REJECTED"
+    createdAtLabel: string
+    amount: number
+  }>
 }
 
 function getRowTheme(status: CustomerRow["latestBookingStatus"]) {
@@ -70,6 +77,23 @@ function getStatusSummary(status: CustomerRow["latestBookingStatus"]) {
   if (status === "REJECTED") return "Latest booking was declined."
   if (status === "PENDING") return "Latest booking is waiting for review."
   return "No booking history yet."
+}
+
+function deriveBookingMetrics(bookings: CustomerRow["bookings"]) {
+  const approvedBookingCount = bookings.filter((booking) => booking.status === "APPROVED").length
+  const approvedAmount = bookings.reduce(
+    (total, booking) => total + (booking.status === "APPROVED" ? booking.amount : 0),
+    0
+  )
+
+  return {
+    bookingCount: bookings.length,
+    approvedBookingCount,
+    approvedAmount,
+    latestBookingStatus: bookings[0]?.status ?? null,
+    latestBookingId: bookings[0]?.id ?? null,
+    latestBookingAmount: bookings[0]?.amount ?? 0,
+  }
 }
 
 export function AdminCustomers({
@@ -128,16 +152,15 @@ export function AdminCustomers({
         currentRows.map((row) => {
           if (row.id !== customerId) return row
 
-          const currentApproved =
-            row.latestBookingStatus === "APPROVED" ? row.latestBookingAmount : 0
-          const nextApproved = nextStatus === "APPROVED" ? row.latestBookingAmount : 0
+          const bookings = row.bookings.map((booking) =>
+            booking.id === bookingId ? { ...booking, status: nextStatus } : booking
+          )
+          const metrics = deriveBookingMetrics(bookings)
 
           return {
             ...row,
-            latestBookingStatus: nextStatus,
-            approvedBookingCount:
-              row.approvedBookingCount + (nextStatus === "APPROVED" ? 1 : 0) - (row.latestBookingStatus === "APPROVED" ? 1 : 0),
-            approvedAmount: row.approvedAmount - currentApproved + nextApproved,
+            bookings,
+            ...metrics,
           }
         })
       )
@@ -231,7 +254,7 @@ export function AdminCustomers({
                   </div>
 
                   <div className={`rounded-xl border p-3 ${tone.action}`}>
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Latest status</p>
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Requests</p>
                     <div className="mt-2">
                       {customer.latestBookingStatus ? (
                         <span
@@ -249,36 +272,62 @@ export function AdminCustomers({
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">{getStatusSummary(customer.latestBookingStatus)}</p>
 
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      {customer.latestBookingId ? (
-                        <>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={pendingBookingId === customer.latestBookingId || customer.latestBookingStatus === "APPROVED"}
-                            className="h-9 rounded-lg border-emerald-500/26 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/18"
-                            onClick={() =>
-                              updateBookingStatus(customer.id, customer.latestBookingId!, "APPROVED")
-                            }
+                    <div className="mt-3 space-y-2">
+                      {customer.bookings.length ? (
+                        customer.bookings.map((booking, index) => (
+                          <div
+                            key={booking.id}
+                            className="rounded-lg border border-white/8 bg-black/30 p-3"
                           >
-                            Approve
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={pendingBookingId === customer.latestBookingId || customer.latestBookingStatus === "REJECTED"}
-                            className="h-9 rounded-lg border-rose-500/26 bg-rose-500/10 text-rose-200 hover:bg-rose-500/18"
-                            onClick={() =>
-                              updateBookingStatus(customer.id, customer.latestBookingId!, "REJECTED")
-                            }
-                          >
-                            Reject
-                          </Button>
-                        </>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <p className="text-sm font-medium text-white">
+                                  Request {index + 1}: {booking.packageName}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {booking.createdAtLabel}
+                                  {booking.amount > 0 ? ` • ${formatUsdAmount(booking.amount)}` : ""}
+                                </p>
+                              </div>
+                              <span
+                                className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBookingStatusBadgeClass(
+                                  booking.status
+                                )}`}
+                              >
+                                {formatBookingStatusLabel(booking.status)}
+                              </span>
+                            </div>
+
+                            <div className="mt-3 grid grid-cols-2 gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={pendingBookingId === booking.id || booking.status === "APPROVED"}
+                                className="h-9 rounded-lg border-emerald-500/26 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/18"
+                                onClick={() =>
+                                  updateBookingStatus(customer.id, booking.id, "APPROVED")
+                                }
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={pendingBookingId === booking.id || booking.status === "REJECTED"}
+                                className="h-9 rounded-lg border-rose-500/26 bg-rose-500/10 text-rose-200 hover:bg-rose-500/18"
+                                onClick={() =>
+                                  updateBookingStatus(customer.id, booking.id, "REJECTED")
+                                }
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))
                       ) : (
-                        <span className="col-span-2 inline-flex items-center text-xs text-muted-foreground">
+                        <span className="inline-flex items-center text-xs text-muted-foreground">
                           No action available
                         </span>
                       )}

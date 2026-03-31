@@ -36,6 +36,7 @@ export default async function CustomersPage() {
           id: true,
           status: true,
           notes: true,
+          packageName: true,
           createdAt: true,
         },
       },
@@ -62,6 +63,13 @@ export default async function CustomersPage() {
       latestBookingStatus: customer.bookings[0]?.status ?? null,
       latestBookingId: customer.bookings[0]?.id ?? null,
       latestBookingAmount: extractBookingAmount(customer.bookings[0]?.notes) ?? 0,
+      bookings: customer.bookings.map((booking) => ({
+        id: booking.id,
+        packageName: booking.packageName,
+        status: booking.status,
+        createdAtLabel: formatDate(booking.createdAt),
+        amount: extractBookingAmount(booking.notes) ?? 0,
+      })),
     }
   })
 

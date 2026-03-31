@@ -139,11 +139,6 @@ export function AppSidebar({
     user.role === "ADMIN"
       ? [
           {
-            title: "New Booking",
-            href: "/booking",
-            icon: IconCalendarEvent,
-          },
-          {
             title: "Add Package",
             href: "/dashboard/admin/packages/new",
             icon: IconBackpack,
@@ -337,15 +332,17 @@ export function AppSidebar({
                 Account settings
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                href={user.role === "CUSTOMER" ? "/dashboard/customer/new-booking" : "/booking"}
-                className="cursor-pointer rounded-xl"
-              >
-                <IconCalendarEvent />
-                Create booking
-              </Link>
-            </DropdownMenuItem>
+            {user.role === "CUSTOMER" ? (
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/dashboard/customer/new-booking"
+                  className="cursor-pointer rounded-xl"
+                >
+                  <IconCalendarEvent />
+                  Create booking
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuItem
               onClick={signOut}

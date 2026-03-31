@@ -11,7 +11,6 @@ import {
   MapPin,
   MapPinned,
   Phone,
-  Send,
   SlidersHorizontal,
   UserCircle2,
   Users,
@@ -394,33 +393,6 @@ export default function BookingPage({ embeddedInDashboard = false }: { embeddedI
     ].join("\n");
   };
 
-  const submitToWhatsApp = () => {
-    if (!requireSignedInUser()) return;
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setError("");
-    setSuccess("");
-    const text = encodeURIComponent(buildMessage());
-    window.open(`https://wa.me/9779707921000?text=${text}`, "_blank");
-  };
-
-  const submitToEmail = () => {
-    if (!requireSignedInUser()) return;
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setError("");
-    setSuccess("");
-    const subject = encodeURIComponent(`Booking Request - ${form.destination}`);
-    const body = encodeURIComponent(buildMessage());
-    window.location.href = `mailto:info@altigohimalayantreks.com?subject=${subject}&body=${body}`;
-  };
-
   const saveToDashboard = async () => {
     if (!requireSignedInUser()) return;
     const validationError = validate();
@@ -489,7 +461,7 @@ export default function BookingPage({ embeddedInDashboard = false }: { embeddedI
             <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
               {embeddedInDashboard
                 ? "Build your trek request with package, schedule, comfort preferences, and optional upgrades, then submit directly from your dashboard."
-                : "Build your trek request with package, schedule, comfort preferences, and optional upgrades. Sign in to save it to your dashboard or send it directly to Altigo via WhatsApp or email."}
+                : "Build your trek request with package, schedule, comfort preferences, and optional upgrades. Sign in to save it directly to your dashboard."}
             </p>
           </div>
 
@@ -817,28 +789,6 @@ export default function BookingPage({ embeddedInDashboard = false }: { embeddedI
                           ? "Save Booking"
                           : "Save to Dashboard"}
                   </Button>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={submitToWhatsApp}
-                      disabled={!form.packageId || !authReady}
-                      className="h-10 rounded-xl"
-                    >
-                      <Send className="h-4 w-4" />
-                      WhatsApp
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={submitToEmail}
-                      disabled={!form.packageId || !authReady}
-                      className="h-10 rounded-xl border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06]"
-                    >
-                      <Mail className="h-4 w-4" />
-                      Email
-                    </Button>
-                  </div>
                 </div>
               </CardContent>
             </Card>

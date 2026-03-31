@@ -12,6 +12,7 @@ import {
   RotateCcw,
   SlidersHorizontal,
 } from "lucide-react";
+import BookingEntryButton from "@/components/booking-entry-button";
 import SearchField from "@/components/search-field";
 import { resolveLocale, localizePackages } from "@/lib/i18n";
 import { trekPackages, type TrekPackage } from "@/lib/packages-data";
@@ -417,14 +418,21 @@ export default function PackagesPage({
                           {copy.view}
                           <ArrowRight size={13} strokeWidth={ICON_STROKE} />
                         </Link>
-                        <Link
-                          href={withLang(
-                            `${embeddedInDashboard ? "/dashboard/customer/new-booking" : "/booking"}?package=${item.id}`,
-                          )}
-                          className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                        >
-                          {copy.book}
-                        </Link>
+                        {embeddedInDashboard ? (
+                          <Link
+                            href={withLang(`/dashboard/customer/new-booking?package=${item.id}`)}
+                            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                          >
+                            {copy.book}
+                          </Link>
+                        ) : (
+                          <BookingEntryButton
+                            bookingPath={withLang(`/booking?package=${item.id}`)}
+                            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+                          >
+                            {copy.book}
+                          </BookingEntryButton>
+                        )}
                       </div>
                     </div>
                   </div>
