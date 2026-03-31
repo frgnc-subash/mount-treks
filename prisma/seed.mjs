@@ -10,10 +10,20 @@ function hashPassword(password) {
   return `${salt}:${hash}`;
 }
 
+function getRequiredEnv(name) {
+  const value = process.env[name]?.trim();
+
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+
+  return value;
+}
+
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@altigo.com";
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
-  const adminName = process.env.ADMIN_NAME ?? "Altigo Admin";
+  const adminEmail = getRequiredEnv("ADMIN_EMAIL");
+  const adminPassword = getRequiredEnv("ADMIN_PASSWORD");
+  const adminName = getRequiredEnv("ADMIN_NAME");
 
   const existingAdmin = await prisma.user.findUnique({
     where: { email: adminEmail.toLowerCase() },

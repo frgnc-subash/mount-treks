@@ -10,6 +10,7 @@ import {
   readOauthState,
 } from "@/lib/auth/google";
 import { prisma } from "@/lib/db";
+import { getPrismaAuthFriendlyError } from "@/lib/prisma-errors";
 
 type GoogleTokenResponse = {
   access_token: string;
@@ -34,7 +35,12 @@ class GoogleAuthError extends Error {
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
+  const oauthError = request.nextUrl.searchParams.get("error");
   const nextPath = state ? readOauthState(state) : null;
+
+  if (oauthError) {
+    return NextResponse.redirect(new URL(`/sign-in?error=google_${oauthError}`, request.url));
+  }
 
   if (!code || !nextPath) {
     return NextResponse.redirect(new URL("/sign-in?error=google_state", request.url));
@@ -136,7 +142,17 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Google auth failed:", error);
-    const errorCode = error instanceof GoogleAuthError ? error.code : "google_auth";
+    const friendlyError = getPrismaAuthFriendlyError(error);
+    let errorCode = "google_auth";
+
+    if (error instanceof GoogleAuthError) {
+      errorCode = error.code;
+    } else if (friendlyError?.message.includes("not configured")) {
+      errorCode = "google_db_config";
+    } else if (friendlyError?.message.includes("schema is missing")) {
+      errorCode = "google_db_schema";
+    }
+
     return NextResponse.redirect(new URL(`/sign-in?error=${errorCode}`, request.url));
   }
 }

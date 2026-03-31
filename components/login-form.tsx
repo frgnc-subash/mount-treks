@@ -30,6 +30,12 @@ function getErrorMessage(errorCode: string | null) {
       return "Google login failed while fetching your profile. Please try again."
     case "google_email":
       return "Your Google account does not have a verified email address."
+    case "google_access_denied":
+      return "Google sign-in was canceled before it could finish."
+    case "google_db_config":
+      return "Google login reached your app, but the server database is not configured."
+    case "google_db_schema":
+      return "Google login reached your app, but the database migrations have not been applied yet."
     case "google_auth":
       return "Google login failed. Please try again."
     default:

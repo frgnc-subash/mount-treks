@@ -23,6 +23,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const googleSiteVerification =
+  process.env.GOOGLE_SITE_VERIFICATION?.trim() || undefined;
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
@@ -51,6 +54,9 @@ export const metadata: Metadata = {
     email: false,
     telephone: false,
     address: false,
+  },
+  verification: {
+    google: googleSiteVerification,
   },
   robots: {
     index: true,
