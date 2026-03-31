@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import SiteChrome from "@/components/site-chrome";
+import { Toaster } from "@/components/ui/sonner";
 import {
   absoluteUrl,
   DEFAULT_OG_IMAGE_PATH,
@@ -152,6 +153,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <SiteChrome>{children}</SiteChrome>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

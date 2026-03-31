@@ -1,7 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  AdminCallout,
   AdminHeader,
   AdminPage,
   AdminPanel,
@@ -11,6 +10,8 @@ import {
   adminSubtleSurfaceClass,
   adminTextareaClass,
 } from "@/components/dashboard/admin-ui";
+import ProfileAvatarPicker from "@/components/dashboard/profile-avatar-picker";
+import ProfileStatusToast from "@/components/dashboard/profile-status-toast";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ProfileValidationError, validateProfileInput } from "@/lib/validators/profile";
@@ -145,14 +146,7 @@ export default async function DashboardProfilePage({ searchParams }: PageProps) 
         title="Profile Settings"
         description="Update your personal details and profile picture securely."
       />
-
-      {query.status === "updated" && (
-        <AdminCallout title="Profile updated" description="Your details have been saved successfully." tone="emerald" />
-      )}
-
-      {query.error && (
-        <AdminCallout title="Update failed" description={query.error} tone="rose" />
-      )}
+      <ProfileStatusToast status={query.status} error={query.error} />
 
       <div className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
         <aside className={`${adminSubtleSurfaceClass} p-5`}>
@@ -198,12 +192,10 @@ export default async function DashboardProfilePage({ searchParams }: PageProps) 
               </label>
 
               <label className="text-sm sm:col-span-2">
-                <span className="mb-1 block text-muted-foreground">Profile Picture URL</span>
-                <input
-                  name="avatarUrl"
-                  defaultValue={profile.avatarUrl ?? ""}
-                  placeholder="https://example.com/avatar.jpg or /logo.webp"
-                  className={adminInputClass}
+                <span className="mb-2 block text-muted-foreground">Profile Picture</span>
+                <ProfileAvatarPicker
+                  fullName={profile.fullName}
+                  defaultAvatarUrl={profile.avatarUrl}
                 />
               </label>
 
