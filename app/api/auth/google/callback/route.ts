@@ -32,6 +32,11 @@ class GoogleAuthError extends Error {
   }
 }
 
+function isConfiguredAdminEmail(email: string) {
+  const configuredAdminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  return Boolean(configuredAdminEmail) && email === configuredAdminEmail;
+}
+
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
@@ -100,6 +105,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const shouldBeAdmin = isConfiguredAdminEmail(email);
+
     let user = await prisma.user.findUnique({
       where: { googleId: googleUser.sub },
       select: { id: true },
@@ -120,6 +127,7 @@ export async function GET(request: NextRequest) {
           data: {
             googleId: googleUser.sub,
             fullName: googleUser.name || undefined,
+            role: shouldBeAdmin ? UserRole.ADMIN : undefined,
           },
           select: { id: true },
         });
@@ -129,11 +137,20 @@ export async function GET(request: NextRequest) {
             fullName: googleUser.name || email.split("@")[0],
             email,
             googleId: googleUser.sub,
-            role: UserRole.CUSTOMER,
+            role: shouldBeAdmin ? UserRole.ADMIN : UserRole.CUSTOMER,
           },
           select: { id: true },
         });
       }
+    } else if (shouldBeAdmin) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          role: UserRole.ADMIN,
+          fullName: googleUser.name || undefined,
+        },
+        select: { id: true },
+      });
     }
 
     const { token, expiresAt } = await createUserSession(user.id);
