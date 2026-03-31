@@ -511,7 +511,7 @@ export default function PackageDetails({ item, locale }: PackageDetailsProps) {
   const scrollToSection = (sectionId: (typeof SECTION_IDS)[number]) => {
     const element = document.getElementById(sectionId);
     if (!element) return;
-    const offset = 96;
+    const offset = window.innerWidth < 640 ? 124 : 112;
     const top = element.getBoundingClientRect().top + window.pageYOffset - offset;
     window.scrollTo({ top, behavior: "smooth" });
     setActiveTab(sectionId);
@@ -571,21 +571,21 @@ export default function PackageDetails({ item, locale }: PackageDetailsProps) {
         </div>
       </div>
 
-      <div className="sticky top-[62px] z-[900] border-b border-white/6 bg-[#050505]/72 backdrop-blur-md">
-        <div className="mx-auto w-full max-w-7xl px-5 py-1 sm:px-8">
-          <div className="flex items-center gap-1 overflow-x-auto">
-                {SECTION_IDS.map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => scrollToSection(tab)}
-                className={`relative inline-flex h-7 items-center justify-center rounded-md px-2.5 text-[10px] font-semibold tracking-[0.08em] uppercase whitespace-nowrap transition-all ${
+      <div className="sticky top-[64px] z-[900] border-b border-white/6 bg-[#050505]/78 backdrop-blur-sm">
+        <div className="mx-auto w-full max-w-7xl px-4 py-1.5 sm:px-8 sm:py-2">
+          <div className="grid grid-cols-3 gap-[3px] rounded-lg bg-white/[0.03] p-[3px]">
+            {SECTION_IDS.map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => scrollToSection(tab)}
+                className={`inline-flex h-7 w-full items-center justify-center rounded-md px-1.5 text-[10px] font-medium transition-colors sm:h-8 sm:text-[11px] ${
                   activeTab === tab
-                    ? "bg-white/[0.12] text-white"
-                    : "text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-200"
+                    ? "bg-white/[0.14] text-white"
+                    : "text-zinc-400 hover:bg-white/[0.07] hover:text-zinc-200"
                 }`}
               >
-                {copy.tabs[tab]}
+                <span className="truncate">{copy.tabs[tab]}</span>
               </button>
             ))}
           </div>

@@ -10,7 +10,6 @@ import {
   Clock3,
   Mountain,
   RotateCcw,
-  ShieldCheck,
   SlidersHorizontal,
 } from "lucide-react";
 import SearchField from "@/components/search-field";
@@ -89,7 +88,6 @@ export default function PackagesPage({
             priceLow: "价格最低",
             durationShort: "行程最短",
           },
-          idealFor: "适合",
           startingPrice: "起价",
           view: "查看",
           book: "预订",
@@ -116,7 +114,6 @@ export default function PackagesPage({
               priceLow: "Precio más bajo",
               durationShort: "Duración más corta",
             },
-            idealFor: "Ideal para",
             startingPrice: "Desde",
             view: "Ver",
             book: "Reservar",
@@ -144,7 +141,6 @@ export default function PackagesPage({
               priceLow: "Lowest Price",
               durationShort: "Shortest Duration",
             },
-            idealFor: "Ideal for",
             startingPrice: "Starting Price",
             view: "View",
             book: "Book",
@@ -157,8 +153,7 @@ export default function PackagesPage({
             talkButton: "Talk to Specialist",
           };
 
-  const idealForLabel = copy.idealFor;
-  const shortenIdealFor = (value: string) => {
+  const audienceTag = (value: string) => {
     if (!value) return value;
     let trimmed = value.trim();
     if (locale === "zh") {
@@ -167,9 +162,10 @@ export default function PackagesPage({
     } else {
       trimmed = trimmed.replace(/(trekkers?|trek seekers?)$/gi, "").trim();
       trimmed = trimmed.replace(/^for\s+/i, "").trim();
+      trimmed = trimmed.replace(/\s*\+\s*.*/g, "").trim();
     }
-    if (trimmed.length > 18) {
-      return `${trimmed.slice(0, 18).trim()}…`;
+    if (trimmed.length > 14) {
+      return `${trimmed.slice(0, 14).trim()}…`;
     }
     return trimmed || value;
   };
@@ -354,87 +350,88 @@ export default function PackagesPage({
         </div>
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {filteredPackages.map((item) => (
-            <article
-              key={item.id}
-              className="group flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-card/45 shadow-[0_12px_28px_rgba(0,0,0,0.22)] transition-all hover:-translate-y-1"
-            >
-              <div className="relative h-48 shrink-0 overflow-hidden">
-                <img
-                  src={item.image || packageImage[item.id] || "/backgrounds/bg8.jpeg"}
-                  alt={item.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-              </div>
-
-              <div className="flex flex-1 flex-col p-4">
-                <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <h2 className="text-xl font-semibold">{item.name}</h2>
-                  <span className="inline-flex max-w-full items-center rounded-md bg-primary/15 px-2 py-1 text-[10px] leading-tight font-semibold text-primary sm:whitespace-nowrap">
-                    {item.difficulty}
-                  </span>
-                </div>
-                <p className="min-h-[44px] text-sm leading-relaxed text-zinc-200">
-                  {shortText(item.summary)}
-                </p>
-
-                <div className="mt-3 grid gap-2 text-sm text-zinc-200 sm:grid-cols-2">
-                  <p className="flex items-start gap-2">
-                    <Clock3
-                      strokeWidth={ICON_STROKE}
-                      className="mt-0.5 h-4 w-4 text-primary"
-                    />
-                    {item.duration}
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <Mountain
-                      strokeWidth={ICON_STROKE}
-                      className="mt-0.5 h-4 w-4 text-primary"
-                    />
-                    {item.altitude}
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <ShieldCheck
-                      strokeWidth={ICON_STROKE}
-                      className="mt-0.5 h-4 w-4 text-primary"
-                    />
-                    {idealForLabel}: {shortenIdealFor(item.idealFor)}
-                  </p>
+          {filteredPackages.map((item) => {
+            const compactAudience = audienceTag(item.idealFor);
+            return (
+              <article
+                key={item.id}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-card/45 shadow-[0_12px_28px_rgba(0,0,0,0.22)] transition-all hover:-translate-y-1"
+              >
+                <div className="relative h-48 shrink-0 overflow-hidden">
+                  <img
+                    src={item.image || packageImage[item.id] || "/backgrounds/bg8.jpeg"}
+                    alt={item.name}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                 </div>
 
-                <div className="mt-auto pt-4">
-                  <div className="rounded-lg border-0 bg-black/25 p-3 ring-0">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="text-xs tracking-wide text-zinc-300 uppercase">
-                        {copy.startingPrice}
-                      </p>
-                      <p className="text-sm font-semibold text-white">
-                        {item.pricing[item.pricing.length - 1]?.price}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Link
-                        href={withLang(`/packages/${item.id}`)}
-                        className="inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-white/8 bg-black/25 px-3 text-sm font-medium text-white hover:border-white/15 hover:bg-white/10"
-                      >
-                        {copy.view}
-                        <ArrowRight size={13} strokeWidth={ICON_STROKE} />
-                      </Link>
-                      <Link
-                        href={withLang(
-                          `${embeddedInDashboard ? "/dashboard/customer/new-booking" : "/booking"}?package=${item.id}`,
-                        )}
-                        className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                      >
-                        {copy.book}
-                      </Link>
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <h2 className="text-xl font-semibold">{item.name}</h2>
+                    <span className="inline-flex max-w-full items-center rounded-md bg-primary/15 px-2 py-1 text-[10px] leading-tight font-semibold text-primary sm:whitespace-nowrap">
+                      {item.difficulty}
+                    </span>
+                    {compactAudience ? (
+                      <span className="inline-flex max-w-full items-center rounded-md border border-white/14 bg-white/[0.04] px-2 py-1 text-[10px] leading-tight font-semibold text-zinc-200 sm:whitespace-nowrap">
+                        {compactAudience}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="min-h-[44px] text-sm leading-relaxed text-zinc-200">
+                    {shortText(item.summary)}
+                  </p>
+
+                  <div className="mt-3 grid gap-2 text-sm text-zinc-200 sm:grid-cols-2">
+                    <p className="flex items-start gap-2">
+                      <Clock3
+                        strokeWidth={ICON_STROKE}
+                        className="mt-0.5 h-4 w-4 text-primary"
+                      />
+                      {item.duration}
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <Mountain
+                        strokeWidth={ICON_STROKE}
+                        className="mt-0.5 h-4 w-4 text-primary"
+                      />
+                      {item.altitude}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto pt-4">
+                    <div className="rounded-lg border-0 bg-black/25 p-3 ring-0">
+                      <div className="mb-3 flex items-center justify-between">
+                        <p className="text-xs tracking-wide text-zinc-300 uppercase">
+                          {copy.startingPrice}
+                        </p>
+                        <p className="text-sm font-semibold text-white">
+                          {item.pricing[item.pricing.length - 1]?.price}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Link
+                          href={withLang(`/packages/${item.id}`)}
+                          className="inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-white/8 bg-black/25 px-3 text-sm font-medium text-white hover:border-white/15 hover:bg-white/10"
+                        >
+                          {copy.view}
+                          <ArrowRight size={13} strokeWidth={ICON_STROKE} />
+                        </Link>
+                        <Link
+                          href={withLang(
+                            `${embeddedInDashboard ? "/dashboard/customer/new-booking" : "/booking"}?package=${item.id}`,
+                          )}
+                          className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                        >
+                          {copy.book}
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
         {filteredPackages.length === 0 && (
           <p className="mt-6 rounded-lg bg-black/20 px-4 py-3 text-sm text-zinc-300">

@@ -18,6 +18,8 @@ import {
 import { resolveLocale, type Locale } from "@/lib/i18n";
 
 const API_URL = "https://mount-treks.onrender.com/api/send-email";
+const MAP_EMBED_URL =
+  "https://www.google.com/maps?q=Altigo%20Himalayan%20Treks%2C%20Thamel%20Area%20-%20Yapikhya%20Marg%2C%20Kathmandu&z=15&output=embed";
 
 const socialLinks = [
   { Icon: Facebook, url: "https://www.facebook.com/profile.php?id=61584054197541" },
@@ -71,7 +73,7 @@ const CONTACT_COPY: Record<Locale, ContactCopy> = {
     },
     details: {
       imageAlt: "Himalayas",
-      mapTitle: "Mount Treks Office Location",
+      mapTitle: "Altigo Himalayan Treks Office Location",
       visitLabel: "Visit Us",
       callLabel: "Call Us",
       emailLabel: "Email Us",
@@ -124,7 +126,7 @@ const CONTACT_COPY: Record<Locale, ContactCopy> = {
     },
     details: {
       imageAlt: "Himalaya",
-      mapTitle: "Ubicación de la oficina de Mount Treks",
+      mapTitle: "Ubicación de la oficina de Altigo Himalayan Treks",
       visitLabel: "Visítanos",
       callLabel: "Llámanos",
       emailLabel: "Escríbenos",
@@ -177,7 +179,7 @@ const CONTACT_COPY: Record<Locale, ContactCopy> = {
     },
     details: {
       imageAlt: "喜马拉雅山脉",
-      mapTitle: "Mount Treks 办公室位置",
+      mapTitle: "Altigo Himalayan Treks 办公室位置",
       visitLabel: "来访我们",
       callLabel: "致电我们",
       emailLabel: "发送邮件",
@@ -270,7 +272,7 @@ const StaticContactDetails = memo(function StaticContactDetails({
       <div className="group relative h-48 w-full overflow-hidden rounded-2xl border border-white/10 shadow-2xl sm:h-64 lg:h-52">
         <iframe
           title={copy.mapTitle}
-          src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3532.06325946146!2d85.30326007546747!3d27.715077976179426!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjfCsDQyJzU0LjMiTiA4NcKwMTgnMjEuMCJF!5e0!3m2!1sen!2snp!4v1710000000000!5m2!1sen!2snp"
+          src={MAP_EMBED_URL}
           className="h-full w-full grayscale transition-all duration-700 group-hover:grayscale-0"
           style={{ border: 0 }}
           allowFullScreen

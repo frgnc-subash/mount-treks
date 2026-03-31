@@ -15,10 +15,45 @@ function trimTrailingSlash(value: string) {
 }
 
 export function getAppBaseUrl(request: NextRequest) {
-  const envUrl = process.env.APP_URL;
-  if (envUrl) return trimTrailingSlash(envUrl);
+  const requestOrigin = trimTrailingSlash(request.nextUrl.origin);
+  const envUrl = process.env.APP_URL?.trim();
+  if (envUrl) {
+    try {
+      const parsedEnvUrl = new URL(envUrl);
+      const envOrigin = trimTrailingSlash(parsedEnvUrl.origin);
+      const requestProtocol = request.nextUrl.protocol;
+      const requestHostname = request.nextUrl.hostname;
+      const sameHostname = parsedEnvUrl.hostname === requestHostname;
+      const isProduction = process.env.NODE_ENV === "production";
 
-  return trimTrailingSlash(request.nextUrl.origin);
+      // In local/dev environments, always trust the incoming request origin.
+      // This prevents accidental callback generation against production APP_URL values.
+      if (!isProduction) {
+        return requestOrigin;
+      }
+
+      // If host doesn't match (preview domain, www/non-www, proxy host rewrite),
+      // prefer request origin so the OAuth callback URL stays consistent.
+      if (!sameHostname) {
+        return requestOrigin;
+      }
+
+      // Avoid breaking OAuth if APP_URL is accidentally set to http for a live https domain.
+      if (
+        requestProtocol === "https:" &&
+        parsedEnvUrl.protocol === "http:" &&
+        sameHostname
+      ) {
+        return requestOrigin;
+      }
+
+      return envOrigin;
+    } catch {
+      return requestOrigin;
+    }
+  }
+
+  return requestOrigin;
 }
 
 export function getGoogleRedirectUri(request: NextRequest) {
