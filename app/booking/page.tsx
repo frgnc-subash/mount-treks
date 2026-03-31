@@ -130,6 +130,10 @@ function BookingCard({
   );
 }
 
+function RequiredMark() {
+  return <span className="text-secondary">*</span>;
+}
+
 export default function BookingPage({ embeddedInDashboard = false }: { embeddedInDashboard?: boolean }) {
   const [form, setForm] = useState<BookingForm>(initialForm);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -357,9 +361,10 @@ export default function BookingPage({ embeddedInDashboard = false }: { embeddedI
     if (!form.firstName.trim()) return "Please enter your first name.";
     if (!form.lastName.trim()) return "Please enter your last name.";
     if (!form.email.trim() || !form.email.includes("@")) return "Please enter a valid email.";
-    if (!form.packageId) return "Please select a package first.";
+    if (!form.phone.trim()) return "Please enter your phone number.";
     if (!form.country.trim()) return "Please enter your country.";
-    if (!form.pickupLocation.trim()) return "Please enter your pickup/location.";
+    if (!form.pickupLocation.trim()) return "Please enter your pickup/current location.";
+    if (!form.packageId) return "Please select a package first.";
     if (!form.destination) return "Please choose a destination.";
     if (!form.startDate) return "Please choose a start date.";
     if (form.people < 1) return "Number of people must be at least 1.";
@@ -480,61 +485,115 @@ export default function BookingPage({ embeddedInDashboard = false }: { embeddedI
               description="Tell us who is travelling and how we should contact you."
               icon={UserCircle2}
             >
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" value={form.firstName} onChange={(e) => setField("firstName", e.target.value)} />
+              <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-4 sm:p-5">
+                <div className="mb-4 flex flex-col gap-1">
+                  <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
+                    Traveller Details
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Required fields are marked with a red star.
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="middleName">Middle Name</Label>
-                  <Input id="middleName" value={form.middleName} onChange={(e) => setField("middleName", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" value={form.lastName} onChange={(e) => setField("lastName", e.target.value)} />
-                </div>
-              </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    Email
-                  </Label>
-                  <Input id="email" type="email" value={form.email} onChange={(e) => setField("email", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    Phone
-                  </Label>
-                  <Input id="phone" value={form.phone} onChange={(e) => setField("phone", e.target.value)} />
-                </div>
-              </div>
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+                  <div className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName" className="flex items-center gap-1.5">
+                          First Name
+                          <RequiredMark />
+                        </Label>
+                        <Input
+                          id="firstName"
+                          required
+                          value={form.firstName}
+                          onChange={(e) => setField("firstName", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="middleName">Middle Name</Label>
+                        <Input
+                          id="middleName"
+                          value={form.middleName}
+                          onChange={(e) => setField("middleName", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName" className="flex items-center gap-1.5">
+                          Last Name
+                          <RequiredMark />
+                        </Label>
+                        <Input
+                          id="lastName"
+                          required
+                          value={form.lastName}
+                          onChange={(e) => setField("lastName", e.target.value)}
+                        />
+                      </div>
+                    </div>
 
-              <div className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
-                <div className="space-y-2">
-                  <Label htmlFor="country" className="flex items-center gap-2">
-                    <Globe2 className="h-4 w-4 text-muted-foreground" />
-                    Country
-                  </Label>
-                  <Input
-                    id="country"
-                    value={form.country}
-                    onChange={(e) => setField("country", e.target.value)}
-                    placeholder="e.g. United States"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pickupLocation" className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    Pickup / Current Location
-                  </Label>
-                  <Input
-                    id="pickupLocation"
-                    value={form.pickupLocation}
-                    onChange={(e) => setField("pickupLocation", e.target.value)}
-                  />
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          Email
+                          <RequiredMark />
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          required
+                          value={form.email}
+                          onChange={(e) => setField("email", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          Phone
+                          <RequiredMark />
+                        </Label>
+                        <Input
+                          id="phone"
+                          required
+                          value={form.phone}
+                          onChange={(e) => setField("phone", e.target.value)}
+                          placeholder="Enter your contact number"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 rounded-2xl border border-white/8 bg-black/20 p-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="country" className="flex items-center gap-2">
+                        <Globe2 className="h-4 w-4 text-muted-foreground" />
+                        Country
+                        <RequiredMark />
+                      </Label>
+                      <Input
+                        id="country"
+                        required
+                        value={form.country}
+                        onChange={(e) => setField("country", e.target.value)}
+                        placeholder="e.g. United States"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="pickupLocation" className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        Pickup / Current Location
+                        <RequiredMark />
+                      </Label>
+                      <Input
+                        id="pickupLocation"
+                        required
+                        value={form.pickupLocation}
+                        onChange={(e) => setField("pickupLocation", e.target.value)}
+                        placeholder="Where should we coordinate from?"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </BookingCard>
