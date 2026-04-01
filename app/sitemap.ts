@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
+import { getAllBlogPosts } from "@/lib/blog";
 import { getAllDestinations, getAllPackages } from "@/lib/content";
 import { SITE_URL } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const [destinations, packages] = await Promise.all([
+  const [destinations, packages, blogPosts] = await Promise.all([
     getAllDestinations(),
     getAllPackages(),
+    Promise.resolve(getAllBlogPosts()),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -32,6 +34,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/guide`,
       lastModified: now,
       changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
       priority: 0.8,
     },
     {
@@ -74,5 +82,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...destinationRoutes, ...packageRoutes];
+  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: `${SITE_URL}/blog/${post.slug}`,
+    lastModified: new Date(post.publishedAt),
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...destinationRoutes, ...packageRoutes, ...blogRoutes];
 }

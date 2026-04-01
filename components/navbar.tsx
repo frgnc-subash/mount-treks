@@ -45,6 +45,7 @@ export default function Navbar() {
           home: "首页",
           destinations: "目的地",
           packages: "产品",
+          blog: "博客",
           contact: "联系",
           signIn: "登录",
           profile: "账户",
@@ -56,6 +57,7 @@ export default function Navbar() {
             home: "Inicio",
             destinations: "Destinos",
             packages: "Paquetes",
+            blog: "Blog",
             contact: "Contacto",
             signIn: "Ingresar",
             profile: "Perfil",
@@ -66,6 +68,7 @@ export default function Navbar() {
             home: "Home",
             destinations: "Destinations",
             packages: "Packages",
+            blog: "Blog",
             contact: "Contact Us",
             signIn: "Sign In",
             profile: "Profile",
@@ -161,6 +164,7 @@ export default function Navbar() {
     { label: copy.home, path: "/" },
     { label: copy.destinations, path: "/destinations" },
     { label: copy.packages, path: "/packages" },
+    { label: copy.blog, path: "/blog" },
     { label: copy.contact, path: "/contact" },
   ];
 
