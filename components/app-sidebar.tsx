@@ -232,7 +232,7 @@ export function AppSidebar({
           </SidebarMenu>
 
           <SidebarTrigger
-            className="size-10 shrink-0 self-center rounded-xl border border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-white/8 hover:text-sidebar-foreground"
+            className="size-10 shrink-0 self-center rounded-xl bg-transparent text-sidebar-foreground hover:bg-white/8 hover:text-sidebar-foreground group-data-[collapsible=icon]:size-8"
           />
         </div>
       </SidebarHeader>
