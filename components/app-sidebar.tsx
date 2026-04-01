@@ -41,6 +41,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { dashboardHomeForRole } from "@/lib/auth/redirect"
 
@@ -192,41 +193,48 @@ export function AppSidebar({
   return (
     <Sidebar
       variant="inset"
-      collapsible="offcanvas"
+      collapsible="icon"
       className="border-r border-sidebar-border"
       {...props}
     >
       <SidebarHeader className="p-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              size="lg"
-              className="h-14 w-full rounded-xl bg-transparent px-2.5 text-sidebar-foreground hover:bg-white/8 hover:text-sidebar-foreground group-data-[collapsible=offcanvas]:border-transparent group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:p-0"
-            >
-              <Link href={roleHomePath}>
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/5 p-1.5 sm:size-10">
-                  <span className="relative block size-full">
-                    <Image
-                      src="/logo.webp"
-                      alt="Altigo Himalayan Treks"
-                      fill
-                      sizes="44px"
-                      className="object-contain"
-                      priority
-                    />
+        <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col">
+          <SidebarMenu className="min-w-0 flex-1">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                size="lg"
+                tooltip="Dashboard home"
+                className="h-14 w-full rounded-xl bg-transparent px-2.5 text-sidebar-foreground hover:bg-white/8 hover:text-sidebar-foreground group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:p-0"
+              >
+                <Link href={roleHomePath}>
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/5 p-1.5 sm:size-10">
+                    <span className="relative block size-full">
+                      <Image
+                        src="/logo.webp"
+                        alt="Altigo Himalayan Treks"
+                        fill
+                        sizes="44px"
+                        className="object-contain"
+                        priority
+                      />
+                    </span>
                   </span>
-                </span>
-                <span className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="text-sm font-semibold">Altigo Ops</span>
-                  <span className="truncate text-xs text-sidebar-foreground/70">
-                    {user.role === "ADMIN" ? "Admin control room" : "Traveller workspace"}
+                  <span className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+                    <span className="text-sm font-semibold">Altigo Ops</span>
+                    <span className="truncate text-xs text-sidebar-foreground/70">
+                      {user.role === "ADMIN" ? "Admin control room" : "Traveller workspace"}
+                    </span>
                   </span>
-                </span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+
+          <SidebarTrigger
+            className="size-10 shrink-0 rounded-xl border border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-white/8 hover:text-sidebar-foreground group-data-[collapsible=icon]:mx-auto"
+          />
+        </div>
       </SidebarHeader>
 
       <SidebarContent>

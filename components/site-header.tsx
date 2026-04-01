@@ -21,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 
 type HeaderNotification = {
   id: string
@@ -196,6 +196,7 @@ export function SiteHeader({
   notificationStorageKey: string
 }) {
   const pathname = usePathname()
+  const { isMobile } = useSidebar()
   const meta = getHeaderMeta(pathname)
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active")
   const [archivedStore, setArchivedStore] = useState<ArchivedStore>(EMPTY_ARCHIVE_STORE)
@@ -270,7 +271,9 @@ export function SiteHeader({
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
       <div className="flex min-h-20 items-center gap-3 px-4 py-4 lg:px-6">
-        <SidebarTrigger className="rounded-xl border border-border bg-card hover:bg-accent" />
+        {isMobile ? (
+          <SidebarTrigger className="rounded-xl border border-border bg-card hover:bg-accent" />
+        ) : null}
 
         <div className="min-w-0 flex-1">
           <Breadcrumb>
