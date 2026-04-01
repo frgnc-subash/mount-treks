@@ -89,7 +89,7 @@ export function ChartAreaInteractive({
   return (
     <Card className="border-border bg-card shadow-sm">
       <CardHeader className="gap-4 border-b border-border">
-        <div>
+        <div className="min-w-0">
           <CardTitle className="text-white">Booking trend</CardTitle>
           <CardDescription>
             Daily booking activity for {formatAnalyticsActiveRangeLabel(activeRange)}. Use the status buttons to narrow
@@ -144,8 +144,8 @@ export function ChartAreaInteractive({
                 onClick={() => onSegmentChange(option.value)}
                 className={
                   isActive
-                    ? "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold text-white transition-colors"
-                    : "inline-flex items-center gap-2 rounded-full border border-border bg-muted/20 px-3 py-1.5 text-xs font-medium text-white/85 transition-colors hover:bg-muted/35"
+                    ? "inline-flex min-h-9 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold text-white transition-colors"
+                    : "inline-flex min-h-9 items-center gap-2 rounded-full border border-border bg-muted/20 px-3 py-1.5 text-xs font-medium text-white/85 transition-colors hover:bg-muted/35"
                 }
                 style={
                   isActive
@@ -163,7 +163,7 @@ export function ChartAreaInteractive({
           })}
         </div>
 
-        <ChartContainer config={chartConfig} className="aspect-auto h-[260px] w-full sm:h-[280px]">
+        <ChartContainer config={chartConfig} className="aspect-auto h-[220px] w-full sm:h-[280px]">
           <AreaChart data={data}>
             <defs>
               <linearGradient id="fillBookings" x1="0" y1="0" x2="0" y2="1">

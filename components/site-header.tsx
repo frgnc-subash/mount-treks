@@ -270,9 +270,9 @@ export function SiteHeader({
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
-      <div className="flex min-h-20 items-center gap-3 px-4 py-4 lg:px-6">
+      <div className="flex min-h-20 items-start gap-3 px-4 py-3 sm:items-center sm:py-4 lg:px-6">
         {isMobile ? (
-          <SidebarTrigger className="rounded-xl border border-border bg-card hover:bg-accent" />
+          <SidebarTrigger className="mt-0.5 rounded-xl border border-border bg-card hover:bg-accent sm:mt-0" />
         ) : null}
 
         <div className="min-w-0 flex-1">
@@ -291,18 +291,18 @@ export function SiteHeader({
           </Breadcrumb>
 
           <div className="mt-1">
-            <h1 className="text-lg font-semibold text-white sm:text-xl">{meta.title}</h1>
+            <h1 className="text-base font-semibold text-white sm:text-xl">{meta.title}</h1>
             <p className="hidden text-sm text-muted-foreground md:block">{meta.description}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 self-start sm:self-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
                 variant="outline"
-                className="relative rounded-xl border-border bg-card text-foreground hover:bg-accent"
+                className="relative h-10 w-10 rounded-xl border-border bg-card p-0 text-foreground hover:bg-accent"
               >
                 <IconBell />
                 {visibleCount > 0 ? (
@@ -320,7 +320,7 @@ export function SiteHeader({
               className="w-[min(24rem,calc(100vw-1.5rem))] rounded-2xl border-border bg-popover p-0 text-popover-foreground"
             >
               <div className="border-b border-border px-4 py-3">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-white">Notifications</p>
                     <p className="text-xs text-muted-foreground">
@@ -356,11 +356,11 @@ export function SiteHeader({
                     ) : null}
                   </div>
                 </div>
-                <div className="mt-3 inline-flex rounded-lg border border-border bg-card p-0.5">
+                <div className="mt-3 inline-flex w-full rounded-lg border border-border bg-card p-0.5 sm:w-auto">
                   <button
                     type="button"
                     onClick={() => setActiveTab("active")}
-                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                    className={`flex-1 rounded-md px-2.5 py-1 text-xs font-medium transition sm:flex-none ${
                       activeTab === "active"
                         ? "bg-accent text-white"
                         : "text-muted-foreground hover:text-white"
@@ -371,7 +371,7 @@ export function SiteHeader({
                   <button
                     type="button"
                     onClick={() => setActiveTab("archived")}
-                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                    className={`flex-1 rounded-md px-2.5 py-1 text-xs font-medium transition sm:flex-none ${
                       activeTab === "archived"
                         ? "bg-accent text-white"
                         : "text-muted-foreground hover:text-white"

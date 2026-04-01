@@ -186,7 +186,7 @@ export function AdminCustomers({
         title="Booking Directory"
         description="Review traveller booking activity, approval value, and decisions from one searchable list."
         action={
-          <div className="w-full max-w-sm">
+          <div className="w-full sm:max-w-sm">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -216,126 +216,126 @@ export function AdminCustomers({
                   className={`rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_46px_rgba(0,0,0,0.42)] sm:p-5 ${tone.shell}`}
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_250px] xl:items-start">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <p className="truncate text-base font-semibold text-white">{customer.fullName}</p>
-                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] ${tone.chip}`}>
-                        {customer.country ?? "Unknown"}
-                      </span>
-                    </div>
-                    <p className="mt-1 truncate text-sm text-muted-foreground">{customer.email}</p>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      <span className={`rounded-md border px-2.5 py-1 ${tone.stat}`}>
-                        Joined {customer.createdAtLabel}
-                      </span>
-                      {customer.phoneNumber ? (
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <p className="truncate text-base font-semibold text-white">{customer.fullName}</p>
+                        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] ${tone.chip}`}>
+                          {customer.country ?? "Unknown"}
+                        </span>
+                      </div>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">{customer.email}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
                         <span className={`rounded-md border px-2.5 py-1 ${tone.stat}`}>
-                          {customer.phoneNumber}
+                          Joined {customer.createdAtLabel}
                         </span>
-                      ) : null}
+                        {customer.phoneNumber ? (
+                          <span className={`rounded-md border px-2.5 py-1 ${tone.stat}`}>
+                            {customer.phoneNumber}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
-                    <div className={`rounded-xl border p-3 ${tone.stat}`}>
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Bookings</p>
-                      <p className="mt-1 text-lg font-semibold text-white">{customer.bookingCount}</p>
-                      <p className="text-xs text-muted-foreground">Total requests</p>
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                      <div className={`rounded-xl border p-3 ${tone.stat}`}>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Bookings</p>
+                        <p className="mt-1 text-lg font-semibold text-white">{customer.bookingCount}</p>
+                        <p className="text-xs text-muted-foreground">Total requests</p>
+                      </div>
+                      <div className={`rounded-xl border p-3 ${tone.stat}`}>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Confirmed</p>
+                        <p className="mt-1 text-lg font-semibold text-white">{customer.approvedBookingCount}</p>
+                        <p className="text-xs text-muted-foreground">Approved trips</p>
+                      </div>
+                      <div className={`rounded-xl border p-3 sm:col-span-2 xl:col-span-1 ${tone.stat}`}>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Approved value</p>
+                        <p className="mt-1 text-lg font-semibold text-white">{formatUsdAmount(customer.approvedAmount)}</p>
+                      </div>
                     </div>
-                    <div className={`rounded-xl border p-3 ${tone.stat}`}>
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Confirmed</p>
-                      <p className="mt-1 text-lg font-semibold text-white">{customer.approvedBookingCount}</p>
-                      <p className="text-xs text-muted-foreground">Approved trips</p>
-                    </div>
-                    <div className={`rounded-xl border p-3 sm:col-span-3 xl:col-span-1 ${tone.stat}`}>
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Approved value</p>
-                      <p className="mt-1 text-lg font-semibold text-white">{formatUsdAmount(customer.approvedAmount)}</p>
-                    </div>
-                  </div>
 
-                  <div className={`rounded-xl border p-3 ${tone.action}`}>
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Requests</p>
-                    <div className="mt-2">
-                      {customer.latestBookingStatus ? (
-                        <span
-                          className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBookingStatusBadgeClass(
-                            customer.latestBookingStatus
-                          )}`}
-                        >
-                          {formatBookingStatusLabel(customer.latestBookingStatus)}
-                        </span>
-                      ) : (
-                        <Badge variant="outline" className="border-border bg-background/70 text-muted-foreground">
-                          No bookings
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="mt-2 text-xs text-muted-foreground">{getStatusSummary(customer.latestBookingStatus)}</p>
-
-                    <div className="mt-3 space-y-2">
-                      {customer.bookings.length ? (
-                        customer.bookings.map((booking, index) => (
-                          <div
-                            key={booking.id}
-                            className="rounded-lg border border-white/8 bg-black/30 p-3"
+                    <div className={`rounded-xl border p-3 ${tone.action}`}>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Requests</p>
+                      <div className="mt-2">
+                        {customer.latestBookingStatus ? (
+                          <span
+                            className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBookingStatusBadgeClass(
+                              customer.latestBookingStatus
+                            )}`}
                           >
-                            <div className="flex flex-wrap items-center justify-between gap-2">
-                              <div>
-                                <p className="text-sm font-medium text-white">
-                                  Request {index + 1}: {booking.packageName}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {booking.createdAtLabel}
-                                  {booking.amount > 0 ? ` • ${formatUsdAmount(booking.amount)}` : ""}
-                                </p>
-                              </div>
-                              <span
-                                className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBookingStatusBadgeClass(
-                                  booking.status
-                                )}`}
-                              >
-                                {formatBookingStatusLabel(booking.status)}
-                              </span>
-                            </div>
+                            {formatBookingStatusLabel(customer.latestBookingStatus)}
+                          </span>
+                        ) : (
+                          <Badge variant="outline" className="border-border bg-background/70 text-muted-foreground">
+                            No bookings
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="mt-2 text-xs text-muted-foreground">{getStatusSummary(customer.latestBookingStatus)}</p>
 
-                            <div className="mt-3 grid grid-cols-2 gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                disabled={pendingBookingId === booking.id || booking.status === "APPROVED"}
-                                className="h-9 rounded-lg border-emerald-500/26 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/18"
-                                onClick={() =>
-                                  updateBookingStatus(customer.id, booking.id, "APPROVED")
-                                }
-                              >
-                                Approve
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                disabled={pendingBookingId === booking.id || booking.status === "REJECTED"}
-                                className="h-9 rounded-lg border-rose-500/26 bg-rose-500/10 text-rose-200 hover:bg-rose-500/18"
-                                onClick={() =>
-                                  updateBookingStatus(customer.id, booking.id, "REJECTED")
-                                }
-                              >
-                                Reject
-                              </Button>
+                      <div className="mt-3 space-y-2">
+                        {customer.bookings.length ? (
+                          customer.bookings.map((booking, index) => (
+                            <div
+                              key={booking.id}
+                              className="rounded-lg border border-white/8 bg-black/30 p-3"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                  <p className="text-sm font-medium text-white">
+                                    Request {index + 1}: {booking.packageName}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {booking.createdAtLabel}
+                                    {booking.amount > 0 ? ` • ${formatUsdAmount(booking.amount)}` : ""}
+                                  </p>
+                                </div>
+                                <span
+                                  className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBookingStatusBadgeClass(
+                                    booking.status
+                                  )}`}
+                                >
+                                  {formatBookingStatusLabel(booking.status)}
+                                </span>
+                              </div>
+
+                              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={pendingBookingId === booking.id || booking.status === "APPROVED"}
+                                  className="h-9 rounded-lg border-emerald-500/26 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/18"
+                                  onClick={() =>
+                                    updateBookingStatus(customer.id, booking.id, "APPROVED")
+                                  }
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={pendingBookingId === booking.id || booking.status === "REJECTED"}
+                                  className="h-9 rounded-lg border-rose-500/26 bg-rose-500/10 text-rose-200 hover:bg-rose-500/18"
+                                  onClick={() =>
+                                    updateBookingStatus(customer.id, booking.id, "REJECTED")
+                                  }
+                                >
+                                  Reject
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        ))
-                      ) : (
-                        <span className="inline-flex items-center text-xs text-muted-foreground">
-                          No action available
-                        </span>
-                      )}
+                          ))
+                        ) : (
+                          <span className="inline-flex items-center text-xs text-muted-foreground">
+                            No action available
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </article>
-            )})}
+                </article>
+              )})}
           </div>
         )}
       </AdminPanel>

@@ -23,10 +23,10 @@ export const adminCodeTextareaClass =
   `${adminTextareaClass} font-mono text-[13px] leading-6 tracking-[0.01em]`;
 
 export const adminSecondaryButtonClass =
-  "rounded-xl border border-border bg-muted/30 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-accent";
+  "inline-flex w-full items-center justify-center rounded-xl border border-border bg-muted/30 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-accent sm:w-auto";
 
 export const adminPrimaryButtonClass =
-  "rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90";
+  "inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:w-auto";
 
 export const adminStickyActionsClass =
   "sticky bottom-3 z-10 flex flex-wrap items-center justify-end gap-2 rounded-3xl border border-border bg-card/95 p-3 backdrop-blur";
@@ -40,7 +40,7 @@ export function AdminPage({
 }) {
   return (
     <main className="text-foreground">
-      <section className={cn("mx-auto w-full min-w-0 space-y-6 pb-3", className)}>{children}</section>
+      <section className={cn("mx-auto w-full min-w-0 space-y-4 pb-3 sm:space-y-6", className)}>{children}</section>
     </main>
   );
 }
@@ -57,14 +57,14 @@ export function AdminHeader({
   eyebrow?: string;
 }) {
   return (
-    <header className={cn(adminSurfaceClass, "p-5 sm:p-6")}>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+    <header className={cn(adminSurfaceClass, "p-4 sm:p-6")}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <p className="text-xs font-semibold tracking-[0.2em] text-primary uppercase">{eyebrow}</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">{title}</h1>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
           {description ? <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p> : null}
         </div>
-        {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+        {actions ? <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">{actions}</div> : null}
       </div>
     </header>
   );

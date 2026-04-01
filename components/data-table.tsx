@@ -61,67 +61,114 @@ export function DataTable({
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <div className="min-w-[880px]">
-              <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(180px,1.1fr)_140px_120px_140px_80px_140px] gap-4 border-b border-border px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-muted-foreground sm:px-6">
-                <div>Traveller</div>
-                <div>Trek</div>
-                <div>Status</div>
-                <div>Amount</div>
-                <div>Start</div>
-                <div>Size</div>
-                <div>Requested</div>
-              </div>
-
+          <>
+            <div className="space-y-3 p-4 md:hidden">
               {data.map((booking) => (
-                <article
-                  key={booking.id}
-                  className="grid grid-cols-[minmax(0,1.3fr)_minmax(180px,1.1fr)_140px_120px_140px_80px_140px] gap-4 border-b border-border/80 px-4 py-4 transition-colors hover:bg-muted/20 sm:px-6"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium text-white">{booking.customerName}</div>
-                    <div className="mt-1 truncate text-xs text-muted-foreground">{booking.customerEmail}</div>
-                  </div>
-
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-sm text-foreground/90">
-                      <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
-                      <span className="truncate">{booking.packageName}</span>
+                <article key={booking.id} className="rounded-2xl border border-border bg-muted/20 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-white">{booking.customerName}</p>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">{booking.customerEmail}</p>
                     </div>
-                    <div className="mt-1 truncate text-xs text-muted-foreground">{booking.destination}</div>
-                  </div>
-
-                  <div className="flex items-center">
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBookingStatusBadgeClass(booking.status)}`}
+                      className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBookingStatusBadgeClass(booking.status)}`}
                     >
                       {formatBookingStatusLabel(booking.status)}
                     </span>
                   </div>
 
-                  <div className="flex items-center text-sm font-medium text-white">
-                    {booking.amountLabel ?? "—"}
+                  <div className="mt-3 rounded-xl border border-border bg-background/60 p-3">
+                    <div className="flex items-center gap-2 text-sm text-foreground/90">
+                      <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{booking.packageName}</span>
+                    </div>
+                    <p className="mt-1 truncate text-xs text-muted-foreground">{booking.destination}</p>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-foreground/85">
-                    <IconCalendarEvent className="size-4 shrink-0 text-muted-foreground" />
-                    <span>{booking.startDateLabel}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-foreground/85">
-                    <IconUsers className="size-4 shrink-0 text-muted-foreground" />
-                    <span>{booking.people}</span>
-                  </div>
-
-                  <div className="flex items-center">
-                    <Badge variant="outline" className="border-border bg-background/70 text-muted-foreground">
-                      {formatMediumDate(booking.createdAt)}
-                    </Badge>
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-xs text-foreground/85">
+                    <div>
+                      <p className="text-muted-foreground">Amount</p>
+                      <p className="mt-1 text-sm font-medium text-white">{booking.amountLabel ?? "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Requested</p>
+                      <p className="mt-1">{formatMediumDate(booking.createdAt)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Start</p>
+                      <p className="mt-1">{booking.startDateLabel}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Size</p>
+                      <p className="mt-1">{booking.people}</p>
+                    </div>
                   </div>
                 </article>
               ))}
             </div>
-          </div>
+
+            <div className="hidden overflow-x-auto md:block">
+              <div className="min-w-[880px]">
+                <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(180px,1.1fr)_140px_120px_140px_80px_140px] gap-4 border-b border-border px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-muted-foreground sm:px-6">
+                  <div>Traveller</div>
+                  <div>Trek</div>
+                  <div>Status</div>
+                  <div>Amount</div>
+                  <div>Start</div>
+                  <div>Size</div>
+                  <div>Requested</div>
+                </div>
+
+                {data.map((booking) => (
+                  <article
+                    key={booking.id}
+                    className="grid grid-cols-[minmax(0,1.3fr)_minmax(180px,1.1fr)_140px_120px_140px_80px_140px] gap-4 border-b border-border/80 px-4 py-4 transition-colors hover:bg-muted/20 sm:px-6"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-white">{booking.customerName}</div>
+                      <div className="mt-1 truncate text-xs text-muted-foreground">{booking.customerEmail}</div>
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 text-sm text-foreground/90">
+                        <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
+                        <span className="truncate">{booking.packageName}</span>
+                      </div>
+                      <div className="mt-1 truncate text-xs text-muted-foreground">{booking.destination}</div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBookingStatusBadgeClass(booking.status)}`}
+                      >
+                        {formatBookingStatusLabel(booking.status)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center text-sm font-medium text-white">
+                      {booking.amountLabel ?? "—"}
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-foreground/85">
+                      <IconCalendarEvent className="size-4 shrink-0 text-muted-foreground" />
+                      <span>{booking.startDateLabel}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-foreground/85">
+                      <IconUsers className="size-4 shrink-0 text-muted-foreground" />
+                      <span>{booking.people}</span>
+                    </div>
+
+                    <div className="flex items-center">
+                      <Badge variant="outline" className="border-border bg-background/70 text-muted-foreground">
+                        {formatMediumDate(booking.createdAt)}
+                      </Badge>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

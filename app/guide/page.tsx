@@ -15,22 +15,31 @@ import {
 } from "lucide-react";
 import { SITE_NAME } from "@/lib/seo";
 import { resolveLocale } from "@/lib/i18n";
+import { getGuideMetadataCopy } from "@/lib/legal-pages";
 
-export const metadata: Metadata = {
-  title: "Nepal Trek Planner",
-  description:
-    "Comprehensive Nepal trekking guide covering visas, gear, seasons, grade selection, insurance, health preparation, and route planning.",
-  alternates: {
-    canonical: "/guide",
-  },
-  openGraph: {
-    title: `${SITE_NAME} | Nepal Trek Planner`,
-    description:
-      "Comprehensive Nepal trekking guide covering visas, gear, seasons, grade selection, insurance, health preparation, and route planning.",
-    url: "/guide",
-    type: "website",
-  },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const query = await searchParams;
+  const locale = resolveLocale(query?.lang);
+  const content = getGuideMetadataCopy(locale);
+
+  return {
+    title: content.title,
+    description: content.description,
+    alternates: {
+      canonical: "/guide",
+    },
+    openGraph: {
+      title: `${SITE_NAME} | ${content.title}`,
+      description: content.description,
+      url: "/guide",
+      type: "website",
+    },
+  };
+}
 
 type GuideTopic = {
   title: string;
