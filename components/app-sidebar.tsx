@@ -197,9 +197,9 @@ export function AppSidebar({
       className="border-r border-sidebar-border"
       {...props}
     >
-      <SidebarHeader className="p-2">
-        <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col">
-          <SidebarMenu className="min-w-0 flex-1">
+      <SidebarHeader className="p-2 group-data-[collapsible=icon]:items-center">
+        <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
+          <SidebarMenu className="min-w-0 flex-1 group-data-[collapsible=icon]:flex-none">
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
@@ -232,7 +232,7 @@ export function AppSidebar({
           </SidebarMenu>
 
           <SidebarTrigger
-            className="size-10 shrink-0 rounded-xl border border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-white/8 hover:text-sidebar-foreground group-data-[collapsible=icon]:mx-auto"
+            className="size-10 shrink-0 self-center rounded-xl border border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-white/8 hover:text-sidebar-foreground"
           />
         </div>
       </SidebarHeader>
